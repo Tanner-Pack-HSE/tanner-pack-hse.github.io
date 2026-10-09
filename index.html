@@ -181,7 +181,7 @@ body.map .leaf{opacity:1;transform:scale(1)}
 .mapcontact{position:absolute;right:16px;top:calc(76px + env(safe-area-inset-top,0px));width:330px;max-height:calc(100% - 170px);overflow:auto;
   background:rgba(11,16,28,.72);border:1px solid rgba(255,181,71,.35);border-radius:10px;padding:18px;display:none}
 .mapcontact .eyebrow{margin:0 0 4px}
-@media (min-width:900px){ .mapcontact{display:block} .tree svg{right:362px;width:auto} }
+@media (min-width:900px){ .mapcontact{display:block} .tree svg{left:0;right:auto;width:calc(100% - 362px)} }
 body.flat .cmenu .cgo{display:none}
 
 @media (max-width:640px){.tree .tcta{bottom:auto;top:calc(60px + env(safe-area-inset-top,0px))}}
