@@ -42,6 +42,33 @@ button{font:inherit;color:inherit}
 .bar .name{font-family:var(--f-display);font-weight:800;letter-spacing:.01em;font-size:15px}
 .bar .right{display:flex;align-items:center;gap:14px}
 .bar .role{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+/* education & skills panel, opened from the header label */
+.rolebtn{all:unset;pointer-events:auto;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:6px 8px;border-radius:5px}
+.rolebtn:hover,.rolebtn[aria-expanded="true"]{color:var(--text);background:rgba(233,237,245,.07)}
+.rolebtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.rolebtn svg{width:9px;height:9px;color:var(--amber);transition:transform .2s}
+.rolebtn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.emenu{position:fixed;z-index:45;right:16px;top:calc(52px + env(safe-area-inset-top,0px));width:min(500px,calc(100vw - 32px));max-height:calc(100vh - 80px);overflow:auto;
+  background:rgba(11,16,28,.97);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--hair);border-radius:8px;padding:18px;
+  display:flex;flex-direction:column;gap:16px;opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .2s,transform .2s}
+.emenu.open{opacity:1;pointer-events:auto;transform:none}
+.emenu h4{margin:0;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);font-weight:500}
+.degree{background:var(--plate-2);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.degree .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.degree b{font-family:var(--f-display);font-weight:800;font-size:17px;line-height:1.2}
+.degree .meta{font-size:12.5px;color:var(--muted)}
+.gpa{display:flex;align-items:baseline;gap:6px;flex:none}
+.gpa strong{font-family:var(--f-display);font-weight:800;font-size:26px;color:var(--amber);font-variant-numeric:tabular-nums;line-height:1}
+.gpa span{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
+.honor{display:inline-block;font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:3px;background:rgba(255,181,71,.14);color:var(--amber)}
+.courses{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.courses li{font-size:12px;padding:4px 9px;border:1px solid var(--hair);border-radius:20px;color:#c9d0e0}
+.skillgrid{display:grid;grid-template-columns:1fr;gap:10px}
+.skillgrid div{font-size:13px;line-height:1.5;color:#c9d0e0}
+.skillgrid div span{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.cmenu .cedu{all:unset;cursor:pointer;text-align:center;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;border-radius:5px;border:1px solid var(--hair);color:var(--text)}
+.cmenu .cedu:hover{border-color:var(--amber);color:var(--amber)}
+
 .mapbtn{all:unset;pointer-events:auto;cursor:pointer;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
   padding:8px 12px;border:1px solid var(--hair);border-radius:4px;background:rgba(11,16,28,.6);display:flex;gap:8px;align-items:center}
 .mapbtn:hover{border-color:var(--amber);color:var(--amber)}
@@ -65,7 +92,7 @@ button{font:inherit;color:inherit}
 .ticks button.on{background:var(--amber);border-color:var(--amber);transform:translateY(-3px)}
 .ticks button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 @media (max-width:1100px){.grp small{visibility:hidden}.grp.on small{visibility:visible}}
-@media (max-width:640px){.bar .role{display:none}.ticks button{width:5px}.ticks button.card-tick{width:11px}.strip{gap:7px}.stripbox{gap:8px;padding:10px}}
+@media (max-width:640px){.bar .role,.rolebtn{display:none}.ticks button{width:5px}.ticks button.card-tick{width:11px}.strip{gap:7px}.stripbox{gap:8px;padding:10px}}
 
 /* caption for the slide in view */
 .cap{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:25;display:flex;gap:12px;align-items:baseline;
@@ -181,7 +208,7 @@ body.map .leaf{opacity:1;transform:scale(1)}
 .mapcontact{position:absolute;right:16px;top:calc(76px + env(safe-area-inset-top,0px));width:330px;max-height:calc(100% - 170px);overflow:auto;
   background:rgba(11,16,28,.72);border:1px solid rgba(255,181,71,.35);border-radius:10px;padding:18px;display:none}
 .mapcontact .eyebrow{margin:0 0 4px}
-@media (min-width:900px){ .mapcontact{display:block} .tree svg{left:0;right:auto;width:calc(100% - 362px)} }
+@media (min-width:900px){ .mapcontact{display:block} }
 body.flat .cmenu .cgo{display:none}
 
 @media (max-width:640px){.tree .tcta{bottom:auto;top:calc(60px + env(safe-area-inset-top,0px))}}
@@ -212,13 +239,25 @@ body.flat .static{display:flex;flex-direction:column;gap:48px;align-items:center
 
 <header class="bar">
   <button class="namebtn" id="namebtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="cmenu">Tanner Pack<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3.5 5 6.5 8 3.5"/></svg></button>
-  <div class="right"><span class="role">Human factors · UX research &amp; design</span>
+  <div class="right"><button class="rolebtn" id="rolebtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="emenu">Human factors · UX research &amp; design<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3.5 5 6.5 8 3.5"/></svg></button>
     <button class="mapbtn" id="mapbtn" type="button" aria-label="Toggle the portfolio map"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 15V7M8 9 4 5M8 8l4-4M8 11l3-2M4 5l-2 1M12 4l2 1"/></svg><span id="maplabel">Map</span></button></div>
 </header>
+<div class="emenu" id="emenu" role="dialog" aria-label="Education and skills">
+  <h4>Education</h4>
+  <div class="degree"><div class="top"><div><b>M.S. Human Systems Engineering</b><div class="meta">Arizona State University · Ira A. Fulton Schools of Engineering · May 2026</div></div><div class="gpa"><strong>3.76</strong><span>GPA</span></div></div><ul class="courses"><li>Human-Automation Interaction</li><li>Foundations of Applied Cognitive Science</li><li>Methods &amp; Tools in Applied Cognitive Science</li><li>Data Analytics</li><li>Regression Analysis</li><li>Unmanned Aerial Systems</li><li>Technology Innovation Lab (Honeywell project)</li></ul></div>
+  <div class="degree"><div class="top"><div><b>B.S. Human Systems Engineering</b><div class="meta">Arizona State University · Ira A. Fulton Schools of Engineering · May 2025</div></div><div class="gpa"><strong>3.95</strong><span>GPA</span></div></div><div><span class="honor">Summa cum laude</span></div><ul class="courses"><li>Human-Computer Interaction</li><li>Information Design &amp; Usability</li><li>Product Design &amp; Evaluation</li><li>Qualitative Research Methods</li><li>Experimental Methods in Human Systems Research</li><li>Statistics for Human Systems Research II</li><li>Applied Cognitive Science</li><li>Perceptual Systems</li><li>Human Factors in Medical Systems</li><li>Designing for Learning</li><li>Creative Thinking &amp; Design Visualization</li><li>Managing &amp; Analyzing Data</li><li>Foundations of Human Systems Engineering (graduate level)</li><li>Human Systems Engineering Capstone</li></ul></div>
+  <h4>What I do</h4>
+  <div class="skillgrid">
+    <div><span>Human factors</span>Task analysis, workload assessment, situational awareness design, alert and warning design, anthropometric analysis, human-automation interaction</div>
+    <div><span>UX research</span>Stakeholder interviews, airport intercept interviews, surveys, synthesis, journey mapping, market sizing</div>
+    <div><span>UX design</span>Information architecture, hand sketches to Figma, mobile app concepts, multi-role interfaces</div>
+    <div><span>Tools</span>Figma, R, OpenSesame</div>
+  </div>
+</div>
 <div class="cmenu" id="cmenu" role="dialog" aria-label="Contact info"><div class="cinfo"><h3>Tanner Pack</h3><p class="sub">Human factors · UX research &amp; design · Scottsdale, AZ · open to relocation</p>
     <div class="crow"><div><small>Email</small><a href="mailto:tannerdpack@gmail.com">tannerdpack@gmail.com</a></div><button class="cbtn" type="button" data-copy="tannerdpack@gmail.com">Copy</button></div>
     <div class="crow"><div><small>Phone</small><a href="tel:+14043996493">(404) 399-6493</a></div><button class="cbtn" type="button" data-copy="(404) 399-6493">Copy</button></div>
-    <button class="cgo" type="button" data-gocontact>Go to the contact page</button></div></div>
+    <button class="cgo" type="button" data-gocontact>Go to the contact page</button><button class="cedu" type="button" data-openedu>Education &amp; skills</button></div></div>
 <nav class="strip" id="strip" aria-label="Timeline"></nav>
 <button class="jump" id="jump" type="button" aria-label="Jump to a project" aria-haspopup="true" aria-expanded="false" title="Jump to a project"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h10M3 8h10M3 12h10"/></svg></button>
 <div class="jumpmenu" id="jumpmenu" role="menu" aria-label="Projects"></div>
@@ -1062,6 +1101,13 @@ const CHAPTERS=[
   $('mapbtn').addEventListener('click',()=>inMap()?leaveMap(target):openMap());
   $('enter').addEventListener('click',()=>leaveMap(0));
   window.__goContact=()=>{ inMap()?leaveMap(LAST):jumpTo(LAST); };
+  // keep the tree centered on screen; shift it left only as far as needed to clear the contact panel
+  const mapPanel=document.querySelector('.mapcontact');
+  function fitTree(){ const W=innerWidth, H=innerHeight, sc=Math.min(W,H)/1000; let shift=0;
+    if(mapPanel&&getComputedStyle(mapPanel).display!=='none'){ const right=W/2+(950-500)*sc, limit=W-16-mapPanel.offsetWidth-24;
+      if(right>limit) shift=Math.min(right-limit, W/2-(500-30)*sc-8); }
+    svg.style.transform=shift>0?`translateX(${-shift}px)`:''; }
+  addEventListener('resize',fitTree); fitTree();
 
   addEventListener('resize',layout);
   // deep links: yoursite/#honeywell opens straight to that project (for separate LinkedIn project entries)
@@ -1079,8 +1125,16 @@ const CHAPTERS=[
 <script>
 (()=>{
   const btn=document.getElementById('namebtn'), menu=document.getElementById('cmenu');
-  const open=()=>{ menu.classList.add('open'); btn.setAttribute('aria-expanded','true'); const f=menu.querySelector('a'); f&&f.focus(); };
+  const ebtn=document.getElementById('rolebtn'), emenu=document.getElementById('emenu');
+  const eopen=()=>{ close(); emenu.classList.add('open'); ebtn.setAttribute('aria-expanded','true'); emenu.scrollTop=0; };
+  const eclose=()=>{ emenu.classList.remove('open'); ebtn.setAttribute('aria-expanded','false'); };
+  const open=()=>{ eclose(); menu.classList.add('open'); btn.setAttribute('aria-expanded','true'); const f=menu.querySelector('a'); f&&f.focus(); };
   const close=()=>{ menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); };
+  ebtn.addEventListener('click',e=>{ e.stopPropagation(); emenu.classList.contains('open')?eclose():eopen(); });
+  document.addEventListener('click',e=>{ if(e.target.closest('[data-openedu]')){ e.stopPropagation(); eopen(); return; } if(!e.target.closest('#emenu,#rolebtn')) eclose(); },true);
+  addEventListener('keydown',e=>{ if(e.key==='Escape'&&emenu.classList.contains('open')){ eclose(); ebtn.focus(); } },true);
+  // keep wheel/touch scrolling inside the panel instead of moving the tour
+  ['wheel','touchmove'].forEach(t=>emenu.addEventListener(t,e=>e.stopPropagation(),{passive:true}));
   btn.addEventListener('click',e=>{ e.stopPropagation(); menu.classList.contains('open')?close():open(); });
   document.addEventListener('click',e=>{ if(!e.target.closest('#cmenu,#namebtn')) close(); });
   addEventListener('keydown',e=>{ if(e.key==='Escape'&&menu.classList.contains('open')){ close(); btn.focus(); } },true);
