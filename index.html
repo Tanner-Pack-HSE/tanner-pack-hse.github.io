@@ -7,7 +7,11 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Tanner Pack · UX Research & Design Portfolio">
 <meta property="og:description" content="Interactive 3D portfolio: drone control interfaces, stakeholder research with Honeywell, operator fatigue, and a field study on seatmate matching.">
-<meta property="og:image" content="preview.png">
+<meta property="og:image" content="https://tanner-pack-hse.github.io/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:url" content="https://tanner-pack-hse.github.io/">
+<link rel="canonical" href="https://tanner-pack-hse.github.io/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b101c'/%3E%3Cpath d='M16 27V15M16 18l-6-6M16 16l6-6M16 21l5-3' stroke='%23ffb547' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <title>Tanner Pack Portfolio</title>
@@ -152,6 +156,34 @@ body.map .leaf{opacity:1;transform:scale(1)}
 .tree .legend{position:absolute;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--muted);max-width:min(380px,calc(100vw - 32px));line-height:1.5}
 .tree .legend b{color:var(--amber);font-weight:500}
 .tree .tcta{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+/* contact: dropdown from the name, and a panel on the map */
+.namebtn{all:unset;pointer-events:auto;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:800;letter-spacing:.01em;font-size:15px;padding:6px 8px;margin:-6px -8px;border-radius:5px}
+.namebtn:hover,.namebtn[aria-expanded="true"]{background:rgba(233,237,245,.07)}
+.namebtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.namebtn svg{width:10px;height:10px;color:var(--amber);transition:transform .2s}
+.namebtn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.cmenu{position:fixed;z-index:45;left:16px;top:calc(52px + env(safe-area-inset-top,0px));width:min(330px,calc(100vw - 32px));background:rgba(11,16,28,.97);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--hair);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px;
+  opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .2s,transform .2s}
+.cmenu.open{opacity:1;pointer-events:auto;transform:none}
+.cinfo{display:flex;flex-direction:column;gap:10px}
+.cinfo h3{margin:0;font-family:var(--f-display);font-weight:800;font-size:20px;line-height:1.15}
+.cinfo .sub{margin:0;font-size:13px;color:var(--muted)}
+.crow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--plate-2);border-radius:5px;padding:8px 8px 8px 12px;min-width:0}
+.crow small{display:block;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.crow a,.crow span.v{color:var(--text);text-decoration:none;font-size:14px;overflow-wrap:anywhere;user-select:all}
+.crow a:hover{color:var(--amber)}
+.cbtn{all:unset;cursor:pointer;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;border-radius:4px;border:1px solid var(--hair);color:var(--text);white-space:nowrap}
+.cbtn:hover{border-color:var(--amber);color:var(--amber)}
+.cbtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.cgo{all:unset;cursor:pointer;text-align:center;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:9px 12px;border-radius:5px;background:var(--amber);color:#1a1205;font-weight:500}
+.cgo:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.mapcontact{position:absolute;right:16px;top:calc(76px + env(safe-area-inset-top,0px));width:330px;max-height:calc(100% - 170px);overflow:auto;
+  background:rgba(11,16,28,.72);border:1px solid rgba(255,181,71,.35);border-radius:10px;padding:18px;display:none}
+.mapcontact .eyebrow{margin:0 0 4px}
+@media (min-width:900px){ .mapcontact{display:block} .tree svg{right:362px;width:auto} }
+body.flat .cmenu .cgo{display:none}
+
 @media (max-width:640px){.tree .tcta{bottom:auto;top:calc(60px + env(safe-area-inset-top,0px))}}
 .tip{position:fixed;z-index:40;pointer-events:none;font-size:12.5px;background:var(--plate);border:1px solid var(--hair);padding:6px 10px;border-radius:4px;max-width:260px;opacity:0;transition:opacity .15s}
 
@@ -179,10 +211,14 @@ body.flat .static{display:flex;flex-direction:column;gap:48px;align-items:center
 
 
 <header class="bar">
-  <div class="name">Tanner Pack</div>
+  <button class="namebtn" id="namebtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="cmenu">Tanner Pack<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3.5 5 6.5 8 3.5"/></svg></button>
   <div class="right"><span class="role">Human factors · UX research &amp; design</span>
     <button class="mapbtn" id="mapbtn" type="button" aria-label="Toggle the portfolio map"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 15V7M8 9 4 5M8 8l4-4M8 11l3-2M4 5l-2 1M12 4l2 1"/></svg><span id="maplabel">Map</span></button></div>
 </header>
+<div class="cmenu" id="cmenu" role="dialog" aria-label="Contact info"><div class="cinfo"><h3>Tanner Pack</h3><p class="sub">Human factors · UX research &amp; design · Scottsdale, AZ · open to relocation</p>
+    <div class="crow"><div><small>Email</small><a href="mailto:tannerdpack@gmail.com">tannerdpack@gmail.com</a></div><button class="cbtn" type="button" data-copy="tannerdpack@gmail.com">Copy</button></div>
+    <div class="crow"><div><small>Phone</small><a href="tel:+14043996493">(404) 399-6493</a></div><button class="cbtn" type="button" data-copy="(404) 399-6493">Copy</button></div>
+    <button class="cgo" type="button" data-gocontact>Go to the contact page</button></div></div>
 <nav class="strip" id="strip" aria-label="Timeline"></nav>
 <button class="jump" id="jump" type="button" aria-label="Jump to a project" aria-haspopup="true" aria-expanded="false" title="Jump to a project"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h10M3 8h10M3 12h10"/></svg></button>
 <div class="jumpmenu" id="jumpmenu" role="menu" aria-label="Projects"></div>
@@ -196,6 +232,10 @@ body.flat .static{display:flex;flex-direction:column;gap:48px;align-items:center
   <svg id="treesvg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg>
   <div class="legend"><b>Map.</b> Roots are my foundations. Branches are projects, and every leaf is a slide. Click any leaf or branch to dive in.</div>
   <div class="tcta"><button class="btn ghost" id="enter" type="button">Start the tour</button></div>
+  <aside class="mapcontact" aria-label="Contact"><p class="eyebrow">Get in touch</p><div class="cinfo"><h3>Tanner Pack</h3><p class="sub">Human factors · UX research &amp; design · Scottsdale, AZ · open to relocation</p>
+    <div class="crow"><div><small>Email</small><a href="mailto:tannerdpack@gmail.com">tannerdpack@gmail.com</a></div><button class="cbtn" type="button" data-copy="tannerdpack@gmail.com">Copy</button></div>
+    <div class="crow"><div><small>Phone</small><a href="tel:+14043996493">(404) 399-6493</a></div><button class="cbtn" type="button" data-copy="(404) 399-6493">Copy</button></div>
+    <button class="cgo" type="button" data-gocontact>Go to the contact page</button></div></aside>
 </section>
 <div class="tip" id="tip"></div>
 <div class="lb" id="lb" role="dialog" aria-label="Slide viewer"><img id="lbimg" alt=""><p id="lbcap"></p></div>
@@ -958,8 +998,8 @@ const CHAPTERS=[
     for(let h=0;h<3;h++){ const s=[(500+r.c[0])/2+(tr()-.5)*30,(650+r.c[1])/2+(tr()-.5)*20]; sketch([s,[s[0]+(tr()-.5)*70,s[1]+30+tr()*30],[s[0]+(tr()-.5)*90,s[1]+60+tr()*40]],0.8,'#7d8aa8',0.6+h*.1,1); }
     const tx=mk('text',{x:r.to[0],y:r.to[1]+20,'text-anchor':r.anchor,class:'rlabel'}); tx.innerHTML=`<tspan class="b">${r.t[0]}</tspan><tspan x="${r.to[0]}" dy="14">${r.t[1]}</tspan>`; });
   sketch([[60,660],[500,652],[940,662]],1,'#3a4560',0,2);
-  const nameT=mk('text',{x:518,y:600,class:'tlabel main'}); nameT.textContent='Tanner Pack'; nameT.onclick=()=>leaveMap(0);
-  const nameS=mk('text',{x:518,y:618,class:'rlabel'}); nameS.textContent='Human systems engineer';
+  const nameT=mk('text',{x:518,y:600,class:'tlabel main'}); nameT.textContent='Tanner Pack'; nameT.onclick=()=>leaveMap(LAST); nameT.setAttribute('role','link'); nameT.setAttribute('aria-label','Contact Tanner Pack');
+  const nameS=mk('text',{x:518,y:618,class:'rlabel'}); nameS.textContent='Human systems engineer · contact me'; nameS.style.cursor='pointer'; nameS.onclick=()=>leaveMap(LAST);
   const BR={
     uas1:{from:[500,520],via:[380,470],tip:[180,420],col:'#ffb547',lx:180,ly:505},
     uas2:{from:[495,500],via:[400,380],tip:[305,255],col:'#ffb547',lx:305,ly:305},
@@ -1021,6 +1061,7 @@ const CHAPTERS=[
   addEventListener('resize',placeJump); requestAnimationFrame(placeJump);
   $('mapbtn').addEventListener('click',()=>inMap()?leaveMap(target):openMap());
   $('enter').addEventListener('click',()=>leaveMap(0));
+  window.__goContact=()=>{ inMap()?leaveMap(LAST):jumpTo(LAST); };
 
   addEventListener('resize',layout);
   // deep links: yoursite/#honeywell opens straight to that project (for separate LinkedIn project entries)
@@ -1032,6 +1073,23 @@ const CHAPTERS=[
   fromHash();
   window.__tour={set:v=>{anim=null;vel=0;u=v;target=v;dirty=true},stories:()=>beats.map((b,i)=>b.type==="story"?i:-1).filter(i=>i>=0)};
   layout(); requestAnimationFrame(loop);
+})();
+</script>
+
+<script>
+(()=>{
+  const btn=document.getElementById('namebtn'), menu=document.getElementById('cmenu');
+  const open=()=>{ menu.classList.add('open'); btn.setAttribute('aria-expanded','true'); const f=menu.querySelector('a'); f&&f.focus(); };
+  const close=()=>{ menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); };
+  btn.addEventListener('click',e=>{ e.stopPropagation(); menu.classList.contains('open')?close():open(); });
+  document.addEventListener('click',e=>{ if(!e.target.closest('#cmenu,#namebtn')) close(); });
+  addEventListener('keydown',e=>{ if(e.key==='Escape'&&menu.classList.contains('open')){ close(); btn.focus(); } },true);
+  document.addEventListener('click',e=>{
+    const c=e.target.closest('[data-copy]');
+    if(c){ const t=c.dataset.copy, done=()=>{ c.textContent='Copied'; setTimeout(()=>c.textContent='Copy',1600); };
+      (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(done,()=>{ const r=document.createRange(); r.selectNodeContents(c.previousElementSibling.querySelector('a')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); c.textContent='Press Ctrl+C'; }); }
+    if(e.target.closest('[data-gocontact]')){ close(); if(window.__goContact) window.__goContact(); else { const st=document.getElementById('static'); st&&st.lastElementChild&&st.lastElementChild.scrollIntoView({behavior:'smooth'}); } }
+  });
 })();
 </script>
 
