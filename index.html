@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Tanner Pack, human factors and UX research portfolio: a three-operator drone control station, Honeywell airspace safety research, fatigue signals, and a 25-traveler field study on seatmate matching.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tanner Pack · UX Research & Design Portfolio">
+<meta property="og:description" content="Interactive 3D portfolio: drone control interfaces, stakeholder research with Honeywell, operator fatigue, and a field study on seatmate matching.">
+<meta property="og:image" content="preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b101c'/%3E%3Cpath d='M16 27V15M16 18l-6-6M16 16l6-6M16 21l5-3' stroke='%23ffb547' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>Tanner Pack Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=Caveat:wght@500;700&display=swap">
+<style>
+/* Layout: one WebGL scene. Every slide is rebuilt from its own edges as strokes spread through depth; they line up into the picture
+   only from that slide's camera. Between slides the camera swings off-axis, the picture comes apart into its strokes, and the next slide
+   is found inside that cloud. Project cards float over the scene; a hand-drawn tree map shows everything at once. */
+:root{
+  --ink:#0b101c; --plate:#151d30; --plate-2:#1d2740;
+  --text:#e9edf5; --muted:#8f99b2;
+  --amber:#ffb547; --teal:#67d1c1; --peri:#9aa8ff;
+  --ok:#5fd08a;
+  --hair:rgba(233,237,245,.12);
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{background:var(--ink);color:var(--text);height:100%}
+body{font-family:var(--f-body);font-size:15px;line-height:1.55;overflow:hidden;overscroll-behavior:none}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit}
+
+.bar{position:fixed;inset:0 0 auto 0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;pointer-events:none}
+.bar .name{font-family:var(--f-display);font-weight:800;letter-spacing:.01em;font-size:15px}
+.bar .right{display:flex;align-items:center;gap:14px}
+.bar .role{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.mapbtn{all:unset;pointer-events:auto;cursor:pointer;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  padding:8px 12px;border:1px solid var(--hair);border-radius:4px;background:rgba(11,16,28,.6);display:flex;gap:8px;align-items:center}
+.mapbtn:hover{border-color:var(--amber);color:var(--amber)}
+.mapbtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.mapbtn svg{width:14px;height:14px}
+
+/* filmstrip */
+.stripbox{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:30;
+  display:flex;gap:10px;align-items:flex-start;max-width:calc(100vw - 32px);padding:10px 12px;border-radius:8px;
+  background:rgba(11,16,28,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--hair);transition:opacity .5s,transform .5s}
+.strip{display:flex;gap:12px;align-items:flex-end;min-width:0;overflow-x:auto;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.grp{display:flex;flex-direction:column;gap:6px;flex:none}
+.grp small{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;transition:color .3s;height:12px}
+.grp.on small{color:var(--amber)}
+.ticks{display:flex;gap:3px}
+.ticks button{all:unset;cursor:pointer;width:7px;height:20px;border-radius:2px;background:var(--plate-2);border:1px solid var(--hair);transition:background .3s,transform .3s,border-color .3s}
+.ticks button.card-tick{width:16px}
+.ticks button.story-tick{width:6px;height:11px;align-self:center;border-radius:6px;border-color:rgba(255,181,71,.5)}
+.ticks button:hover{border-color:var(--muted)}
+.ticks button.on{background:var(--amber);border-color:var(--amber);transform:translateY(-3px)}
+.ticks button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+@media (max-width:1100px){.grp small{visibility:hidden}.grp.on small{visibility:visible}}
+@media (max-width:640px){.bar .role{display:none}.ticks button{width:5px}.ticks button.card-tick{width:11px}.strip{gap:7px}.stripbox{gap:8px;padding:10px}}
+
+/* caption for the slide in view */
+.cap{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:25;display:flex;gap:12px;align-items:baseline;
+  max-width:calc(100vw - 32px);font-size:14px;transition:opacity .35s;pointer-events:none;text-shadow:0 1px 8px #000}
+.cap b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cap span{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);flex:none}
+.cap em{font-style:normal;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);flex:none}
+
+.hint{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:20;font-family:var(--f-mono);
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);transition:opacity .5s;white-space:nowrap}
+.hint::after{content:"";display:block;width:1px;height:26px;margin:8px auto 0;background:linear-gradient(var(--amber),transparent);animation:drip 1.8s infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* stage */
+.stage{position:fixed;inset:0;overflow:hidden;background:radial-gradient(ellipse 75% 60% at 50% 46%,#131b2f 0%,var(--ink) 75%);
+  transition:transform 1s cubic-bezier(.7,0,.3,1),opacity .9s}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage.zoomable{cursor:zoom-in}
+.cards{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 46%;pointer-events:none}
+body.map .stage{transform:scale(.35);opacity:0;pointer-events:none}
+body.map .stripbox,body.map .hint,body.map .cap{opacity:0!important;pointer-events:none}
+/* project jump: square on the top edge of the filmstrip, opens a list of projects */
+.jump{flex:none;width:18px;height:18px;border-radius:3px;cursor:pointer;
+  background:var(--plate-2);border:1px solid var(--amber);color:var(--amber);display:grid;place-items:center;padding:0;transition:background .2s}
+.jump:hover,.jump[aria-expanded="true"]{background:var(--amber);color:#1a1205}
+.jump:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.jump svg{width:10px;height:10px}
+.jumpmenu{position:fixed;z-index:32;left:16px;transform:translate(0,8px);min-width:min(320px,calc(100vw - 32px));max-width:calc(100vw - 32px);
+  background:rgba(11,16,28,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--hair);border-radius:8px;padding:6px;
+  display:flex;flex-direction:column;gap:2px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.jumpmenu.open{opacity:1;pointer-events:auto;transform:translate(0,0)}
+.jumpmenu button{all:unset;cursor:pointer;display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:baseline;padding:9px 12px;border-radius:5px;font-size:14px}
+.jumpmenu button:hover,.jumpmenu button:focus-visible{background:var(--plate-2)}
+.jumpmenu button.on{color:var(--amber)}
+.jumpmenu .n{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.jumpmenu .c{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted)}
+body.map .jump,body.map .jumpmenu{opacity:0!important;pointer-events:none}
+.stage.blink{transition:opacity .22s}
+
+.loading{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);transition:opacity .4s}
+
+.card{position:absolute;left:50%;top:46%;width:min(720px,calc(100vw - 32px));margin-left:calc(min(720px,calc(100vw - 32px)) / -2);
+  background:rgba(21,29,48,.94);border:1px solid var(--hair);border-radius:6px;padding:clamp(20px,3.6vw,38px);
+  box-shadow:0 30px 80px rgba(0,0,0,.45);backface-visibility:hidden;translate:0 -50%;max-height:calc(100% - 170px);overflow:hidden;visibility:hidden}
+.card.live{pointer-events:auto}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin:0 0 12px}
+.card h1,.card h2{font-family:var(--f-display);font-weight:800;line-height:1.03;letter-spacing:-.02em;text-wrap:balance;margin:0 0 14px}
+.card h1{font-size:clamp(30px,5.6vw,58px)}
+.card h2{font-size:clamp(24px,4vw,40px)}
+.card p{margin:0 0 12px;max-width:62ch;color:#c9d0e0}
+.card .small{font-size:14px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:4px;overflow:hidden;margin:16px 0 0}
+.facts div{background:var(--plate);padding:10px 14px;min-width:0}
+.facts dt{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.facts dd{margin:0;font-size:14px}
+.status{display:inline-block;font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-left:8px;vertical-align:2px}
+.status.done{background:rgba(95,208,138,.15);color:var(--ok)} .status.wip{background:rgba(255,181,71,.15);color:var(--amber)}
+.skills{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;padding:0;list-style:none}
+.skills li{font-size:12.5px;padding:4px 10px;border:1px solid var(--hair);border-radius:20px;color:#c9d0e0}
+.copyrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.copyrow code{font-family:var(--f-mono);font-size:14px;background:var(--plate-2);padding:8px 12px;border-radius:4px;user-select:all}
+.btn{all:unset;cursor:pointer;font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:9px 14px;border-radius:4px;background:var(--amber);color:#1a1205;font-weight:500}
+.btn.ghost{background:none;color:var(--text);border:1px solid var(--hair)}
+.btn:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+.edge{position:absolute;left:50%;top:46%;width:min(720px,calc(100vw - 32px));height:2px;translate:-50% 0;
+  background:linear-gradient(90deg,transparent,var(--amber) 15%,var(--amber) 85%,transparent);box-shadow:0 0 18px var(--amber);opacity:0}
+
+/* tree map */
+.tree{position:fixed;inset:0;z-index:10;opacity:0;pointer-events:none;transform:scale(1.8);transition:transform 1.05s cubic-bezier(.7,0,.3,1),opacity .8s;
+  background:radial-gradient(ellipse 60% 60% at 50% 55%,#141c31 0%,var(--ink) 75%)}
+body.map .tree{opacity:1;pointer-events:auto;transform:scale(1)}
+.tree.leaving{transform:scale(4)!important;opacity:0!important}
+.tree svg{position:absolute;inset:0;width:100%;height:100%}
+.tree .ink{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tree .grow{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.6s cubic-bezier(.3,0,.2,1)}
+body.map .tree .grow{stroke-dashoffset:0}
+.leaf{cursor:pointer;opacity:0;transform-box:fill-box;transform-origin:center;transform:scale(.3);transition:opacity .5s,transform .5s}
+body.map .leaf{opacity:1;transform:scale(1)}
+.leaf:hover,.leaf:focus-visible{transform:scale(2.6)!important;outline:none;transition-delay:0s!important}
+.leaf rect{fill:none;stroke:var(--hair)}
+.leaf:hover rect,.leaf:focus-visible rect{stroke:var(--amber);stroke-width:1}
+.tlabel{cursor:pointer;font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;fill:var(--text)}
+.tlabel.main{font-family:var(--f-display);font-size:19px;font-weight:800;letter-spacing:0;text-transform:none}
+.tlabel:hover{fill:var(--amber)}
+.rlabel{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;fill:var(--muted)}
+.rlabel tspan.b{fill:var(--text)}
+.tlabel,.rlabel{opacity:0;transition:opacity .8s .9s} body.map .tlabel, body.map .rlabel{opacity:1}
+.tree .legend{position:absolute;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--muted);max-width:min(380px,calc(100vw - 32px));line-height:1.5}
+.tree .legend b{color:var(--amber);font-weight:500}
+.tree .tcta{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+@media (max-width:640px){.tree .tcta{bottom:auto;top:calc(60px + env(safe-area-inset-top,0px))}}
+.tip{position:fixed;z-index:40;pointer-events:none;font-size:12.5px;background:var(--plate);border:1px solid var(--hair);padding:6px 10px;border-radius:4px;max-width:260px;opacity:0;transition:opacity .15s}
+
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:50;background:rgba(6,9,16,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;opacity:0;pointer-events:none;transition:opacity .3s}
+.lb.open{opacity:1;pointer-events:auto;cursor:zoom-out}
+.lb img{max-width:min(1400px,96vw);max-height:84vh;object-fit:contain;border-radius:4px;background:#fff}
+.lb p{margin:0;font-size:14px;color:var(--muted)}
+
+/* reduced motion or no WebGL: a plain scrolling page */
+.static{display:none}
+body.flat{overflow:auto;height:auto}
+body.flat .stage,body.flat .stripbox,body.flat .strip,body.flat .hint,body.flat .cap,body.flat .mapbtn,body.flat .tree,body.flat .jump,body.flat .jumpmenu{display:none}
+body.flat .static{display:flex;flex-direction:column;gap:48px;align-items:center;padding:80px 16px 60px}
+.static section{width:min(1100px,100%);display:flex;flex-direction:column;gap:18px}
+.static .card{position:static;margin:0;translate:none;width:100%;max-height:none;visibility:visible}
+.static .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:14px}
+.static figure{margin:0;background:var(--plate);border:1px solid var(--hair);border-radius:6px;overflow:hidden}
+.static figure img{display:block;width:100%;height:auto;background:#fff}
+.static figcaption{padding:10px 14px;font-size:13.5px}
+</style>
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+
+
+<header class="bar">
+  <div class="name">Tanner Pack</div>
+  <div class="right"><span class="role">Human factors · UX research &amp; design</span>
+    <button class="mapbtn" id="mapbtn" type="button" aria-label="Toggle the portfolio map"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 15V7M8 9 4 5M8 8l4-4M8 11l3-2M4 5l-2 1M12 4l2 1"/></svg><span id="maplabel">Map</span></button></div>
+</header>
+<nav class="strip" id="strip" aria-label="Timeline"></nav>
+<button class="jump" id="jump" type="button" aria-label="Jump to a project" aria-haspopup="true" aria-expanded="false" title="Jump to a project"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h10M3 8h10M3 12h10"/></svg></button>
+<div class="jumpmenu" id="jumpmenu" role="menu" aria-label="Projects"></div>
+<div class="cap" id="cap" style="opacity:0"><span id="capch"></span><b id="captx"></b><em id="capn"></em></div>
+<div class="hint" id="hint">Scroll, swipe or press ↓</div>
+
+<main class="stage" id="stage"><div class="loading" id="loading">Drawing…</div><div class="cards" id="cards"></div></main>
+<div class="static" id="static"></div>
+
+<section class="tree" id="tree" aria-label="Portfolio map">
+  <svg id="treesvg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg>
+  <div class="legend"><b>Map.</b> Roots are my foundations. Branches are projects, and every leaf is a slide. Click any leaf or branch to dive in.</div>
+  <div class="tcta"><button class="btn ghost" id="enter" type="button">Start the tour</button></div>
+</section>
+<div class="tip" id="tip"></div>
+<div class="lb" id="lb" role="dialog" aria-label="Slide viewer"><img id="lbimg" alt=""><p id="lbcap"></p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+const A={"p03_0":1.7874,"p03_1":1.7874,"p04_0":1.7814,"p04_1":1.7814,"p05_0":1.7814,"p06_0":1.7814,"p06_1":1.7814,"p07_0":1.7891,"p07_1":1.7891,"p08_0":1.7844,"p08_1":1.7844,"p09_0":1.7723,"p09_1":1.7783,"p10_0":1.8093,"p10_1":1.8093,"p11_0":1.7932,"p11_1":1.7905,"p12_0":1.7874,"p12_1":1.7874,"p13_0":1.7874,"p13_1":1.7874,"p14_0":1.7874,"p14_1":1.7874,"p15_0":1.7814,"p15_1":1.7814,"p16_0":1.7814,"p16_1":1.7814,"p17_0":1.7814,"p17_1":1.7814,"p18_0":1.7814,"p18_1":1.7814,"p19_0":1.7814,"p19_1":1.7814,"p20_0":1.7814,"p20_1":1.7814,"p21_0":1.7814,"p22_0":1.7814,"p22_1":1.7814,"p24_0":0.861,"p25_0":0.9647,"p26_0":0.9096,"p27_0":0.9039,"p28_0":0.8986,"p29_0":0.8233,"p30_0":0.9106,"p31_0":1.0074,"p33_0":0.9286,"p34_0":1.8249,"p35_0":0.9656,"s01":1.7778,"s02":1.7778,"s03":1.7778,"s04":1.7778,"s05":1.7778,"s06":1.7778,"s07":1.7778,"r01":1.7778,"r02":1.7778};
+const S=(id,cap)=>({id,cap,dark:+id.slice(1,3)<=22});
+
+const CHAPTERS=[
+ {key:'about',label:'About',card:`
+   <p class="eyebrow">Selected work · 2026</p>
+   <h1>I design interfaces for people working under pressure.</h1>
+   <p>I'm a human systems engineer. I study the people who run a system, find where it breaks down for them, and design the screens, alerts and workflows that fix it. This portfolio covers a three-operator drone control station, stakeholder research with Honeywell, and a study of when tired operators need help from automation.</p>
+   <dl class="facts">
+     <div><dt>Education</dt><dd>M.S. Human Systems Engineering, ASU, 2026</dd></div>
+     <div><dt>Undergrad</dt><dd>B.S. HSE, ASU, summa cum laude</dd></div>
+     <div><dt>Based in</dt><dd>Scottsdale, AZ · open to relocation</dd></div>
+   </dl>`},
+
+ {key:'uas1',label:'UAS · Concept',card:`
+   <p class="eyebrow">Project 01 · HSE graduate project · Human-automation interaction <span class="status done">Completed</span></p>
+   <h2>UAS command-and-control interface design</h2>
+   <p class="small">A human-centered control station for an emergency medical supply drone (EMSAD), built by Team 5. The goal was better situational awareness and fewer decision errors during complex flights. The design started with a task analysis of operator workload to find key information needs and failure points, then organized every screen around how operators think rather than how the system is built.</p>
+   <ul class="skills"><li>Cognitive task analysis</li><li>Workload assessment</li><li>Mode awareness</li><li>Alert prioritization</li><li>Workstation ergonomics</li></ul>`,
+  slides:[S('r01','My role: primary interface designer'),S('p03_0','EMSAD: emergency medical supply and assistance drone'),S('p03_1','Overview: what EMSAD is and why it is needed'),S('p04_0','UAV design and functionality'),S('p04_1','Anthropometric data for reach and controls'),S('p05_0','Pilot workspace'),S('p06_0','Navigator workspace'),S('p06_1','Payload operator workspace'),S('p07_0','Seated work and chair design'),S('p07_1','Ergonomic chair design')]},
+
+ {key:'uas2',label:'UAS · Interfaces',card:`
+   <p class="eyebrow">Project 01 · Part 2 of 4</p>
+   <h2>Three operators, three interfaces</h2>
+   <p>The pilot, navigator and payload operator each get a display built around what they act on first, with shared design principles for attention, mental models and consistency across all three.</p>`,
+  slides:[S('p08_0','Pilot interface'),S('p08_1','Navigator interface'),S('p09_0','Payload operator interface'),S('p09_1','Displays and design principles')]},
+
+ {key:'uas3',label:'UAS · Warnings',card:`
+   <p class="eyebrow">Project 01 · Part 3 of 4</p>
+   <h2>Warnings and alerts that tell you what to do</h2>
+   <p>Every alert carries a signal word, the hazard, the consequence and the action to take. Color, redundant visual cues and likelihood alarms scale with urgency. Each scenario is shown annotated, then as the operator would see it.</p>
+   <ul class="skills"><li>Low altitude</li><li>Low battery</li><li>Obstacle detection</li><li>Equipment fault</li></ul>`,
+  slides:[S('p10_0','Warnings and alerts'),S('p10_1','Anatomy of a warning'),S('p11_0','Redundant cues and likelihood alarms'),S('p11_1','Pilot display warnings and alerts'),
+   S('p12_0','Low altitude, annotated'),S('p12_1','Low altitude, pilot view'),S('p13_0','Low battery, annotated'),S('p13_1','Low battery, pilot view'),
+   S('p14_0','Obstacle detection, annotated'),S('p14_1','Obstacle detection, pilot view'),S('p15_0','Navigator warnings and alerts'),S('p15_1','Obstacle detection, navigator annotated'),
+   S('p16_0','Obstacle detection, navigator view'),S('p16_1','Payload operator warnings and alerts'),S('p17_0','Equipment fault, annotated'),S('p17_1','Equipment fault, payload view'),
+   S('p18_0','Equipment fault, bottom screen annotated'),S('p18_1','Equipment fault, bottom screen')]},
+
+ {key:'uas4',label:'UAS · Automation',card:`
+   <p class="eyebrow">Project 01 · Part 4 of 4</p>
+   <h2>Who does what: automation and the common operating picture</h2>
+   <p>Machines take collision avoidance, system monitoring and real-time adjustments. People keep strategic planning, ethical calls and emergency response. A common operating picture keeps the whole crew working from the same view.</p>`,
+  slides:[S('p19_0','Automation'),S('p19_1','Tasks best performed by automation'),S('p20_0','Tasks best performed by human operators'),S('p20_1','Common operating picture'),S('p21_0','Common operating picture display'),S('p22_0','COP: navigation, system and environment data'),S('p22_1','COP: mission, alerts and operator status')]},
+
+ {key:'hw',label:'Honeywell',card:`
+   <p class="eyebrow">Project 02 · Honeywell Innovation Lab · Systems engineering capstone <span class="status done">Completed</span></p>
+   <h2>Drone airspace safety and privacy</h2>
+   <p class="small">With Honeywell's Innovation Lab, our team ran the full process from problem identification to an executive pitch. Customer discovery interviews with operators, regulators and the public surfaced real privacy and safety concerns. Those findings drove a market analysis, a mobile app concept and a formal pitch where we defended design decisions and market viability to Honeywell executives.</p>
+   <ul class="skills"><li>Customer discovery</li><li>Interview synthesis</li><li>Journey mapping</li><li>Opportunity sizing</li><li>Executive pitch</li></ul>`,
+  slides:[S('r02','My role: researcher, UX designer and synthesis lead'),S('p24_0','Airspace Assurance Group: the team'),S('p25_0','Current state journey and our solution'),S('p26_0','System concept and key risks'),S('p27_0','Value proposition and competitive landscape'),S('p28_0','Market opportunity: TAM, SAM, SOM'),S('p29_0','App screens: alerts, map, drone detail, reporting'),S('p30_0','Four proof points and roadmap'),S('p31_0','Why this matters, and why now')]},
+
+ {key:'fat',label:'Fatigue signals',card:`
+   <p class="eyebrow">Project 03 · HSE 531 Data Analytics <span class="status done">Completed</span></p>
+   <h2>Which body signal warns that an operator is about to break down?</h2>
+   <p class="small">I integrated the FatigueSet dataset (12 participants, 36 source files) and analyzed it in R with correlation analysis, mixed-effects models and segmented regression. Breathing rate was the strongest predictor of reaction-time variability, ahead of heart rate, HRV and electrodermal activity. Variability accelerates at about 23 breaths per minute.</p>
+   <dl class="facts">
+     <div><dt>Green</dt><dd>Below 20 / min · nominal</dd></div>
+     <div><dt>Amber</dt><dd>20 to 23 · monitor</dd></div>
+     <div><dt>Red</dt><dd>Above 23 · automation support</dd></div>
+   </dl>
+   <p class="small" style="margin-top:12px">Overload doesn't just slow people down. It makes them unpredictable. And a chest strap can measure breathing in the field, where EEG can't go.</p>`,
+  slides:[S('p33_0','Reaction time by fatigue condition'),S('p34_0','Performance distribution by stress intensity'),S('p35_0','Correlation structure and the three-tier risk zones')]},
+
+ {key:'seat',label:'Seat matching',card:`
+   <p class="eyebrow">Project 04 · Independent field research <span class="status done">25 interviews</span></p>
+   <h2>Seating by social intention</h2>
+   <p class="small">Some travelers want to talk, some want quiet, some need to work. Before designing anything, I tested whether people would pick a seatmate who wants the same kind of flight. I built a small web app to log answers and ran in-person intercept interviews with 25 travelers at the airport.</p>
+   <dl class="facts">
+     <div><dt>Would use it</dt><dd>16 of 25</dd></div>
+     <div><dt>Top choice</dt><dd>Quiet (14 of 25)</dd></div>
+     <div><dt>Would switch airlines</dt><dd>15 of 25</dd></div>
+   </dl>
+   <ul class="skills"><li>Intercept interviews</li><li>Survey design</li><li>Data-collection tool</li><li>Willingness to pay</li></ul>`,
+  slides:[S('s01','Who I talked to: 25 travelers at the airport'),S('s02','Demand: 16 of 25 would use it'),S('s03','Most people want a quiet neighbor'),S('s04','Interest doesn’t equal payment'),S('s05','Frequent flyers were least willing to pay'),S('s07','15 of 25 would switch airlines for it'),S('s06','What it means for the design')]},
+ {key:'contact',label:'Contact',card:`
+   <p class="eyebrow">Next</p>
+   <h2>Let's talk about your users.</h2>
+   <p>I'm looking for UX research and design roles where understanding people comes before drawing screens. Open to relocation.</p>
+   <div class="copyrow"><code id="mail">tannerdpack@gmail.com</code><button class="btn" id="copy" type="button">Copy email</button></div>
+   <div class="copyrow"><code>(404) 399-6493</code><button class="btn ghost" id="tomap" type="button">See the map</button></div>`}
+];
+</script>
+<script>
+(()=>{
+  const $=id=>document.getElementById(id);
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  const smooth=(a,b,v)=>{const t=clamp((v-a)/(b-a),0,1);return t*t*(3-2*t)};
+  function rng(seed){return()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}}
+
+  /* ---------- story cartoons: short animated explainers that live between slides ----------
+     Each is its own stop on the journey. Scenes play in order with a big caption each; lines "boil" like hand-drawn animation. */
+  const INK={a:'#ffb547',t:'#67d1c1',p:'#9aa8ff',w:'#e9edf5',r:'#ff6b5e',g:'#5fd08a',m:'#8f99b2'};
+  const E=(p,a,b)=>smooth(a,b,p), L=(a,b,t)=>a+(b-a)*t;
+  function pen(ctx,seed){ const r=rng(seed), J=v=>v+(r()-.5)*3.2;
+    const P={ ctx,
+      c(col,w=4){ ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=w; ctx.lineCap='round'; ctx.lineJoin='round'; return P; },
+      ga(a){ ctx.globalAlpha=clamp(a,0,1); return P; },
+      push(x,y,rot=0,sc=1){ ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.scale(sc,sc); return P; },
+      pop(){ ctx.restore(); return P; },
+      l(x1,y1,x2,y2,n=2){ for(let i=0;i<n;i++){ ctx.beginPath(); ctx.moveTo(J(x1),J(y1)); ctx.quadraticCurveTo((x1+x2)/2+(r()-.5)*6,(y1+y2)/2+(r()-.5)*6,J(x2),J(y2)); ctx.stroke(); } return P; },
+      pl(pts,close=false,n=2){ if(pts.length<2) return P; for(let i=0;i<n;i++){ ctx.beginPath(); pts.forEach(([x,y],k)=>k?ctx.lineTo(J(x),J(y)):ctx.moveTo(J(x),J(y))); if(close) ctx.closePath(); ctx.stroke(); } return P; },
+      o(cx,cy,rx,ry=rx,n=2){ if(rx<=0||ry<=0) return P; for(let i=0;i<n;i++){ ctx.beginPath(); const s=r()*6.28;
+        for(let a=0;a<=6.6;a+=.18){ const x=cx+Math.cos(a+s)*rx*(1+(r()-.5)*.05), y=cy+Math.sin(a+s)*ry*(1+(r()-.5)*.05); a?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke(); } return P; },
+      dot(x,y,rad){ ctx.beginPath(); ctx.arc(x,y,Math.max(0,rad),0,6.283); ctx.fill(); return P; },
+      arc(cx,cy,rad,a0,a1,n=1){ for(let i=0;i<n;i++){ ctx.beginPath(); for(let q=0;q<=24;q++){ const a=a0+(a1-a0)*q/24, x=cx+Math.cos(a)*rad+(r()-.5)*2, y=cy+Math.sin(a)*rad+(r()-.5)*2; q?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke(); } return P; },
+      rc(x,y,w,h,n=2){ return P.pl([[x,y],[x+w,y],[x+w,y+h],[x,y+h]],true,n); },
+      ar(x1,y1,x2,y2){ P.l(x1,y1,x2,y2); const a=Math.atan2(y2-y1,x2-x1), h=22; P.l(x2,y2,x2-Math.cos(a-.45)*h,y2-Math.sin(a-.45)*h,1); P.l(x2,y2,x2-Math.cos(a+.45)*h,y2-Math.sin(a+.45)*h,1); return P; },
+      dash(x1,y1,x2,y2,seg=20,f=1){ const L_=Math.hypot(x2-x1,y2-y1), n=Math.max(2,Math.floor(L_/seg)), m=Math.floor(n*f); for(let i=0;i<m;i+=2) P.l(x1+(x2-x1)*i/n,y1+(y2-y1)*i/n,x1+(x2-x1)*Math.min(i+1,m)/n,y1+(y2-y1)*Math.min(i+1,m)/n,1); return P; },
+      t(s,x,y,size=40,al='center'){ ctx.font=`700 ${size}px Caveat,"Segoe Print","Comic Sans MS",cursive`; ctx.textAlign=al; ctx.textBaseline='middle'; ctx.fillText(s,x,y); return P; },
+      check(x,y,s=1){ return P.pl([[x-22*s,y],[x-6*s,y+18*s],[x+26*s,y-20*s]],false,2); },
+      cross(x,y,s=1){ return P.l(x-20*s,y-20*s,x+20*s,y+20*s).l(x+20*s,y-20*s,x-20*s,y+20*s); },
+      drone(x,y,s=1,T=0){ const b=(1+Math.sin(T*40)*.25); P.rc(x-34*s,y-12*s,68*s,26*s).l(x-34*s,y-6*s,x-78*s,y-26*s).l(x+34*s,y-6*s,x+78*s,y-26*s)
+        .o(x-78*s,y-32*s,44*s*b,8*s,1).o(x+78*s,y-32*s,44*s*(2-b),8*s,1).l(x-22*s,y+14*s,x-30*s,y+32*s,1).l(x+22*s,y+14*s,x+30*s,y+32*s,1); return P; },
+      head(x,y,s=1,phones=false){ P.o(x,y,30*s).arc(x,y+96*s,62*s,Math.PI*1.08,Math.PI*1.92);
+        if(phones){ P.arc(x,y,38*s,Math.PI*1.1,Math.PI*1.9).o(x-38*s,y+4*s,8*s,12*s,1).o(x+38*s,y+4*s,8*s,12*s,1); } return P; },
+      person(x,y,s=1,lean=0){ const hx=x+lean*40*s; P.o(hx,y,22*s).l(hx,y+22*s,x,y+90*s).l(L(hx,x,.3),y+44*s,x-32*s,y+72*s).l(L(hx,x,.3),y+44*s,x+32*s,y+72*s).l(x,y+90*s,x-24*s,y+140*s).l(x,y+90*s,x+24*s,y+140*s); return P; },
+      house(x,y,s=1){ P.rc(x-60*s,y-70*s,120*s,70*s).pl([[x-74*s,y-66*s],[x,y-128*s],[x+74*s,y-66*s]]).rc(x-14*s,y-36*s,28*s,36*s,1); return P; },
+      tree(x,y,s=1){ P.l(x,y,x,y-30*s,1).pl([[x-34*s,y-30*s],[x,y-120*s],[x+34*s,y-30*s]],true); return P; },
+      flame(x,y,s=1,T=0){ if(s<=0.02) return P; const w=Math.sin(T*11+x)*6*s; P.pl([[x,y],[x-26*s,y-34*s],[x-12*s+w,y-62*s],[x-6*s+w*1.6,y-100*s],[x+12*s+w,y-64*s],[x+28*s,y-46*s],[x+20*s,y-12*s],[x,y]],false); return P; },
+      bell(x,y,s=1,T=0,ring=0){ const a=Math.sin(T*26)*0.25*ring; P.push(x,y,a,s); P.pl([[-46,34],[-34,18],[-32,-14],[-16,-40],[0,-46],[16,-40],[32,-14],[34,18],[46,34]]).l(-50,36,50,36).o(0,48,9); P.pop();
+        if(ring>0.1){ P.arc(x,y,70*s,-2.6,-2.0).arc(x,y,70*s,-1.1,-0.5); } return P; },
+      warn(x,y,s=1){ P.pl([[x,y-50*s],[x+54*s,y+40*s],[x-54*s,y+40*s]],true).l(x,y-16*s,x,y+14*s).dot(x,y+28*s,4*s); return P; },
+      battery(x,y,w,h,lv){ P.rc(x,y,w,h).rc(x+w,y+h*.3,w*.08,h*.4,1); const f=clamp(lv,0.03,1), lw=ctx.lineWidth; ctx.lineWidth=h*.5; P.l(x+h*.35,y+h/2,x+h*.35+(w-h*.7)*f,y+h/2,1); ctx.lineWidth=lw; return P; },
+      phone(x,y,w,h){ P.rc(x,y,w,h).l(x+w*.38,y+h-18,x+w*.62,y+h-18,1); return P; },
+      gauge(x,y,rad,ang){ P.arc(x,y,rad,Math.PI*.8,Math.PI*2.2,2); for(let q=0;q<=6;q++){ const a=Math.PI*.8+q*(Math.PI*1.4/6); P.l(x+Math.cos(a)*rad*.82,y+Math.sin(a)*rad*.82,x+Math.cos(a)*rad*.95,y+Math.sin(a)*rad*.95,1); }
+        P.l(x,y,x+Math.cos(ang)*rad*.7,y+Math.sin(ang)*rad*.7).dot(x,y,8); return P; },
+      pylon(x,y,s=1){ P.pl([[x-40*s,y],[x-8*s,y-220*s],[x+8*s,y-220*s],[x+40*s,y]]).l(x-60*s,y-180*s,x+60*s,y-180*s).l(x-46*s,y-140*s,x+46*s,y-140*s)
+        .l(x-30*s,y-60*s,x+20*s,y-130*s,1).l(x+30*s,y-60*s,x-20*s,y-130*s,1); return P; },
+      clock(x,y,rad,hr){ P.o(x,y,rad); for(let q=0;q<12;q++){ const a=q*Math.PI/6; P.l(x+Math.cos(a)*rad*.84,y+Math.sin(a)*rad*.84,x+Math.cos(a)*rad*.95,y+Math.sin(a)*rad*.95,1); }
+        const a=hr/12*Math.PI*2-Math.PI/2; P.l(x,y,x+Math.cos(a)*rad*.55,y+Math.sin(a)*rad*.55); P.l(x,y,x,y-rad*.78); return P; },
+      robot(x,y,s=1){ P.rc(x-40*s,y-35*s,80*s,70*s).o(x-16*s,y-6*s,8*s).o(x+16*s,y-6*s,8*s).l(x-14*s,y+18*s,x+14*s,y+18*s,1).l(x,y-35*s,x,y-58*s,1).o(x,y-64*s,6*s,6*s,1); return P; },
+      bulb(x,y,s=1,on=0){ P.o(x,y,24*s,26*s).l(x-10*s,y+28*s,x+10*s,y+28*s,1).l(x-8*s,y+36*s,x+8*s,y+36*s,1);
+        if(on>0.1){ for(let q=0;q<7;q++){ const a=-Math.PI*.9+q*Math.PI*.3; P.l(x+Math.cos(a)*36*s,y+Math.sin(a)*36*s,x+Math.cos(a)*(36+18*on)*s,y+Math.sin(a)*(36+18*on)*s,1); } } return P; },
+      screen(x,y,w,h){ return P.rc(x,y,w,h); },
+    }; return P; }
+
+  // block layouts used by the "consistent layout" cartoon
+  const LAYOUTS=[[[.05,.08,.9,.12],[.05,.28,.3,.64],[.42,.28,.53,.3],[.42,.64,.53,.28]],[[.05,.75,.9,.17],[.65,.08,.3,.6],[.05,.08,.55,.28],[.05,.42,.55,.26]],[[.6,.08,.35,.84],[.05,.08,.5,.4],[.05,.55,.24,.37],[.32,.55,.23,.37]]];
+  function blocks(P,x,y,w,h,lay,col){ lay.forEach(([a,b,c,d],i)=>P.c(i?col:INK.w,3).rc(x+a*w,y+b*h,c*w,d*h,1)); }
+
+  const STORIES={
+    p03_0:{title:'Why a drone?',scenes:[
+      {d:3.4,cap:'A wildfire cuts off the only road in.',f(P,p,T){ s1ground(P,E(p,.2,.7)); s1house(P,E(p,0,.5),T); s1amb(P,L(-170,300,E(p,.3,.9)),0); }},
+      {d:3,cap:'Crews wait. Medical supplies can’t get through.',f(P,p,T){ s1ground(P,1); s1house(P,1,T); s1amb(P,300,1); P.c(INK.a,4).clock(380,420,46,T*3); P.c(INK.r,5).ga(.5+.5*Math.sin(T*8)).t('!',470,410,80).ga(1); }},
+      {d:4,cap:'A drone carries the kit over the gap.',f(P,p,T){ s1ground(P,1); s1house(P,1,T); s1amb(P,300,1); const t=E(p,.05,.78), x=L(400,980,t), y=420-Math.sin(t*Math.PI)*230;
+        P.c(INK.a,4).drone(x,y-50,1.1,T); const drop=E(p,.78,.95), by=L(y,450,drop); P.c(INK.w,3).l(x,y-30,x,by-18,1); P.c(INK.r,4).rc(x-20,by-18,40,34).l(x,by-12,x,by+10,1).l(x-11,by-1,x+11,by-1,1);
+        if(p>.95) P.c(INK.g,6).check(1060,350,1.4); }},
+    ]},
+    p03_1:{title:'Why this airframe?',scenes:[
+      {d:3.2,cap:'It lifts straight up, like a helicopter…',f(P,p,T){ const y=L(440,310,E(p,.1,.9)); vtol(P,640,y,0,T); P.c(INK.a,5).ga(E(p,.1,.4)).ar(200,600,200,300).t('hover',200,640,44).ga(1); P.c(INK.w,3).l(80,620,1200,620); }},
+      {d:3.6,cap:'…then tilts its rotors and flies like a plane.',f(P,p,T){ const tilt=E(p,.05,.45), x=L(640,960,E(p,.5,1)); vtol(P,x,310,tilt,T,1.15,1-E(p,.55,.7));
+        P.c(INK.p,3).ga(E(p,.35,.6)); for(let q=0;q<4;q++) P.l(x-200-q*60,250+q*22,x-140-q*60,250+q*22,1); P.ga(1); P.c(INK.a,5).ga(E(p,.4,.7)).ar(300,560,700,560).t('cruise, far',500,610,44).ga(1); }},
+    ]},
+    p04_0:{title:'Why measure people?',scenes:[
+      {d:3.4,cap:'A shorter operator can’t reach the far controls.',f(P,p,T){ seat(P,1,E(p,.1,.7),760); if(p>.7) P.c(INK.r,5).cross(760,360,1); }},
+      {d:3.6,cap:'So every control sits inside everyone’s reach.',f(P,p,T){ const cx=L(760,640,E(p,0,.5)); seat(P,1,1,cx); P.c(INK.t,4).ga(E(p,.4,.7)).arc(476,384,280,-1.0,0.5).t('95th',780,250,42); P.c(INK.a,4).ga(E(p,.5,.8)).arc(476,384,200,-0.9,0.4).t('5th',690,320,42).ga(1); if(p>.6) P.c(INK.g,6).check(cx+40,330,1.2); }},
+    ]},
+    p04_1:{title:'Why three stations?',scenes:[
+      {d:2.4,cap:'One aircraft…',f(P,p,T){ P.c(INK.a,4).drone(640,220+Math.sin(T*2)*10,1.4,T); }},
+      {d:3.4,cap:'…three different jobs.',f(P,p,T){ P.c(INK.a,4).drone(640,220+Math.sin(T*2)*10,1.4,T);
+        [[300,'pilot',INK.t],[640,'navigator',INK.p],[980,'payload',INK.a]].forEach(([x,lab,c],i)=>{ const a=E(p,i*.25,i*.25+.25); if(a<=0) return; P.c(c,4).ga(a).head(x,500,1,true).t(lab,x,630,40); P.c(INK.w,3).dash(x,450,640,270,20,a).ga(1); }); }},
+      {d:3.2,cap:'Each one gets a screen built for their job.',f(P,p,T){ P.c(INK.a,4).drone(640,220+Math.sin(T*2)*10,1.4,T);
+        [[300,INK.t,0],[640,INK.p,1],[980,INK.a,2]].forEach(([x,c,i])=>{ P.c(c,4).head(x,500,1,true); const a=E(p,i*.2,i*.2+.3); P.c(c,4).ga(a); blocks(P,x-90,360-a*20,180,110,LAYOUTS[i],c); P.ga(1); }); }},
+    ]},
+    p06_1:{title:'Why the chair matters',scenes:[
+      {d:2.6,cap:'Hour one: sharp and upright.',f(P,p,T){ P.c(INK.w,4).clock(250,330,110,1); desk(P,0,0); }},
+      {d:3.4,cap:'Hour six: slumped, sore and distracted.',f(P,p,T){ const h=L(1,6,E(p,0,.6)); P.c(INK.w,4).clock(250,330,110,h); desk(P,E(p,.2,.8),0); if(p>.6){ P.c(INK.r,4).ga(.5+.5*Math.sin(T*7)); P.l(730,420,700,410,1).l(726,450,694,452,1).l(734,480,704,490,1); P.ga(1);} }},
+      {d:3.2,cap:'Good seating keeps them alert for the whole shift.',f(P,p,T){ P.c(INK.w,4).clock(250,330,110,6); desk(P,1-E(p,.2,.8),E(p,0,.4)); if(p>.8) P.c(INK.g,6).check(250,520,1.3); }},
+    ]},
+    p08_0:{title:'Why split the roles?',scenes:[
+      {d:3.2,cap:'The pilot flies, moment to moment.',f(P,p,T){ const a=Math.sin(T*3)*.35; P.c(INK.t,4).rc(260,520,160,44).push(340,520,a).l(0,0,0,-140).o(0,-154,24).pop(); P.c(INK.a,4).drone(820,300+Math.sin(T*3)*30,1.2,T); P.c(INK.t,4).t('pilot',340,620,44); }},
+      {d:3.6,cap:'The navigator plans the whole route ahead.',f(P,p,T){ P.c(INK.w,4).rc(380,190,520,360); const pts=[[430,500],[540,400],[660,450],[780,300],[860,240]], n=E(p,.05,.85)*(pts.length-1), k=Math.floor(n);
+        const shown=pts.slice(0,k+1); if(k<pts.length-1){ const f=n-k; shown.push([L(pts[k][0],pts[k+1][0],f),L(pts[k][1],pts[k+1][1],f)]); }
+        P.c(INK.a,4).pl(shown,false,2); pts.slice(0,k+1).forEach(([x,y])=>P.o(x,y,10)); P.c(INK.p,4).t('navigator',640,610,44); }},
+    ]},
+    p09_0:{title:'Why one layout?',scenes:[
+      {d:3.4,cap:'A different layout on every screen means hunting for things.',f(P,p,T){ [140,490,840].forEach((x,i)=>{ P.c(INK.w,4).rc(x,230,300,220); blocks(P,x,230,300,220,LAYOUTS[i],INK.p); });
+        const j=Math.floor(T*3)%3, xs=[290,640,990]; P.c(INK.r,5).o(xs[j]+Math.sin(T*9)*40,340,22); P.t('?',xs[j]+60,260,60); }},
+      {d:3.4,cap:'The same layout everywhere means eyes know where to go.',f(P,p,T){ const m=E(p,0,.6); [140,490,840].forEach((x,i)=>{ const lay=LAYOUTS[i].map((b,q)=>b.map((v,z)=>L(v,LAYOUTS[0][q][z],m))); P.c(INK.w,4).rc(x,230,300,220); blocks(P,x,230,300,220,lay,INK.t); });
+        if(p>.6){ const j=Math.floor(T*1.5)%3; P.c(INK.g,5).o([140,490,840][j]+60,265,18); } if(p>.85) P.c(INK.g,6).check(640,540,1.3); }},
+    ]},
+    p10_0:{title:'Why alerts need design',scenes:[
+      {d:2.6,cap:'One alarm is easy to handle.',f(P,p,T){ P.c(INK.w,4).rc(220,150,560,390); P.c(INK.a,4).bell(500,340,1.1,T,1); P.c(INK.w,4).head(1000,400,1.2); }},
+      {d:3.4,cap:'Then dozens go off at once…',f(P,p,T){ P.c(INK.w,4).rc(220,150,560,390); const rr=rng(77), n=Math.floor(E(p,0,.8)*18);
+        for(let q=0;q<n;q++){ const x=270+rr()*460, y=200+rr()*300; (q%2?P.c(INK.r,3).warn(x+Math.sin(T*20+q)*4,y,.42):P.c(INK.a,3).bell(x,y,.42,T,1)); }
+        P.c(INK.w,4).head(1000+Math.sin(T*14)*6,400,1.2); }},
+      {d:3.4,cap:'…and the one that really matters gets lost.',f(P,p,T){ P.c(INK.w,4).rc(220,150,560,390); const rr=rng(77); for(let q=0;q<18;q++){ const x=270+rr()*460, y=200+rr()*300; (q%2?P.c(INK.r,3).warn(x,y,.42):P.c(INK.a,3).bell(x,y,.42,T,1)); }
+        P.c(INK.r,6).ga(1-E(p,.3,.9)).o(560,390,58).ga(1); P.c(INK.w,4).head(1000,400,1.2); P.c(INK.a,4).ga(E(p,.3,.6)).t('?',1080,280,90).t('?',1150,350,60).t('?',920,270,50).ga(1); }},
+    ]},
+    p10_1:{title:'What makes a good alert',scenes:[
+      {d:5,cap:'Every alert answers four questions, in order.',f(P,p,T){ [['WARNING',INK.r,'how bad?'],['low battery',INK.a,'what?'],['may not get home',INK.p,'so what?'],['return now',INK.g,'do what?']].forEach(([s,c,q],i)=>{ const a=E(p,i*.2,i*.2+.18); if(a<=0) return; const x=50+i*305;
+        P.c(c,4).ga(a).rc(x,300-(1-a)*30,250,150).t(s,x+125,375-(1-a)*30,i===2?32:i?38:46).c(INK.w,3).t(q,x+125,500,36); if(i<3&&a>.9) P.c(INK.w,4).ar(x+256,375,x+300,375); P.ga(1); }); }},
+      {d:3.4,cap:'So the operator knows exactly what to do, fast.',f(P,p,T){ P.c(INK.g,4).ga(.6+.4*Math.sin(T*6)).rc(900,280,260,160).t('return now',1030,360,44).ga(1); P.c(INK.t,4).house(260,560,1.1); const x=L(760,320,E(p,.2,.95)); P.c(INK.a,4).drone(x,330,1,T); P.c(INK.w,3).dash(x+60,360,860,360); }},
+    ]},
+    p11_1:{title:'Why low-altitude alerts?',scenes:[
+      {d:3.2,cap:'Flying low over the trees on a video feed…',f(P,p,T){ trees(P,T*120); P.c(INK.a,4).drone(500,L(260,330,p),1.1,T); P.c(INK.a,3).dash(40,420,1240,420); P.t('safe floor',1120,394,34); }},
+      {d:3.6,cap:'…the treeline comes up faster than you think.',f(P,p,T){ trees(P,T*120,1+E(p,0,.4)*.5); const dip=E(p,0,.45), up=E(p,.55,.9); P.c(INK.a,4).drone(500,330+dip*80-up*170,1.1,T); P.c(INK.a,3).dash(40,420,1240,420);
+        if(p>.35&&p<.75){ P.c(INK.r,4).ga(.5+.5*Math.sin(T*16)).warn(640,250,.9).t('TOO LOW',780,250,46).ga(1); } if(p>.85) P.c(INK.g,6).check(640,220,1.2); }},
+    ]},
+    p12_1:{title:'Why warn early?',scenes:[
+      {d:3.2,cap:'The drone flies out. The battery drains.',f(P,p,T){ P.c(INK.t,4).house(170,560,1.2); const x=L(260,1040,E(p,0,1)); P.c(INK.w,3).dash(250,520,x-60,300+(1040-x)*.25); P.c(INK.a,4).drone(x,260+(1040-x)*.25,1,T); P.c(INK.w,4).battery(1000,560,150,60,L(1,.35,p)); }},
+      {d:3.4,cap:'Past one point, it can’t make it back.',f(P,p,T){ P.c(INK.t,4).house(170,560,1.2); P.c(INK.w,3).dash(250,520,980,300); P.c(INK.a,4).drone(1040,260,1,T); P.c(INK.r,4).battery(1000,560,150,60,L(.35,.2,p));
+        P.c(INK.r,6).ga(E(p,.1,.4)*(.6+.4*Math.sin(T*8))).cross(700,390,1.2).t('point of no return',700,460,40).ga(1); P.c(INK.r,3).ga(E(p,.4,.7)).dash(980,300,250,520,20,.55).ga(1); }},
+      {d:3.6,cap:'So the warning has to come before that point.',f(P,p,T){ P.c(INK.t,4).house(170,560,1.2); P.c(INK.w,3).dash(250,520,980,300); P.c(INK.r,4).cross(700,390,1); P.c(INK.a,4).bell(520,170,.8,T,1); P.c(INK.a,2).ga(.6).dash(520,220,520,268,12).ga(1); const x=L(560,220,E(p,.2,.95)); P.c(INK.a,4).drone(x,350+(x-220)*-.1,1,T); if(p>.95) P.c(INK.g,6).check(170,360,1.3); }},
+    ]},
+    p13_1:{title:'Why obstacle detection?',scenes:[
+      {d:3.4,cap:'On a video feed, thin wires almost disappear.',f(P,p,T){ P.c(INK.w,4).pylon(260,620,1.3).pylon(1020,620,1.3); P.c(INK.w,3).ga(.18).pl([[180,388],[640,470],[1100,388]]).pl([[200,440],[640,520],[1080,440]]).ga(1); P.c(INK.a,4).drone(L(200,560,E(p,0,1)),L(300,420,E(p,0,1)),1.1,T); }},
+      {d:3.6,cap:'Obstacle detection spots them first and warns the crew.',f(P,p,T){ P.c(INK.w,4).pylon(260,620,1.3).pylon(1020,620,1.3); const hl=E(p,.2,.4); P.c(hl>0?INK.r:INK.w,3+hl*2).ga(.18+.82*hl).pl([[180,388],[640,470],[1100,388]]).pl([[200,440],[640,520],[1080,440]]).ga(1);
+        const y=L(420,220,E(p,.45,.9)); P.c(INK.a,4).drone(560,y,1.1,T); const pr_=(T*1.4)%1; P.c(INK.t,3).ga(1-pr_).arc(620,y+20,60+pr_*160,-.6,.6).ga(1); if(p>.9) P.c(INK.g,6).check(700,170,1.2); }},
+    ]},
+    p14_1:{title:'Why alert the whole crew?',scenes:[
+      {d:3.2,cap:'An alert only the pilot sees leaves the crew guessing.',f(P,p,T){ crew(P,[1,0,0]); P.c(INK.r,4).bell(300,330,.8,T,1); P.c(INK.m,4).ga(E(p,.3,.6)).t('?',640,440,70).t('?',980,400,70).ga(1); }},
+      {d:3.6,cap:'So every station gets the same alert at the same time.',f(P,p,T){ const on=E(p,.15,.6); crew(P,[1,on,on]); P.c(INK.r,4).bell(640,200,1.2,T,1); const w=(T*1.2)%1; P.c(INK.r,3).ga(1-w).o(640,220,40+w*360,30+w*260,1).ga(1); if(p>.7) P.c(INK.g,6).check(640,620,1.2); }},
+    ]},
+    p16_1:{title:'Why fault alerts?',scenes:[
+      {d:2.8,cap:'The gauge says everything looks fine…',f(P,p,T){ P.c(INK.t,4).gauge(400,380,150,Math.PI*1.5+Math.sin(T*2)*.05).t('looks normal',400,600,42); }},
+      {d:3.4,cap:'…while a sensor is quietly overheating.',f(P,p,T){ P.c(INK.t,4).gauge(400,380,150,Math.PI*1.5+Math.sin(T*2)*.05); const h=E(p,0,1); P.c(INK.w,4).ga(E(p,0,.2)).rc(830,170,64,340).o(862,560,56).ga(1); P.c(INK.r,7).l(862,540,862,L(530,200,h),1); P.c(INK.r,4).ga(E(p,.6,.8)).t('heating up',862,660,42).ga(1); }},
+      {d:3.2,cap:'A fault alert catches what a quick glance would miss.',f(P,p,T){ P.c(INK.t,4).gauge(400,380,150,Math.PI*1.5); P.c(INK.w,4).rc(830,170,64,340).o(862,560,56); P.c(INK.r,7).l(862,540,862,200,1);
+        const y=L(-120,90,E(p,0,.35)); P.c(INK.r,4).rc(320,y,640,90).t('EQUIPMENT FAULT: sensor overheating',640,y+46,40); }},
+    ]},
+    p19_1:{title:'Who should do what?',scenes:[
+      {d:3,cap:'Machines are fast, tireless and consistent.',f(P,p,T){ P.c(INK.t,4).robot(400,360,1.6); for(let q=0;q<5;q++){ const a=E(p,q*.15,q*.15+.15); if(a>0) P.c(INK.g,5).ga(a).check(620+q*120,360,1).ga(1); } P.c(INK.t,3); for(let q=0;q<3;q++) P.l(220-(T*300+q*80)%160,320+q*40,280-(T*300+q*80)%160,320+q*40,1); }},
+      {d:3,cap:'People bring judgment when things get messy.',f(P,p,T){ P.c(INK.a,4).head(400,330,1.4); P.c(INK.a,4).bulb(400,170,1.2,E(p,.3,.6)); P.c(INK.w,3).pl([[640,300],[760,300],[760,420],[700,420],[700,360],[880,360],[880,480],[1000,480]]); P.c(INK.a,5).o(L(640,1000,E(p,.2,.9)),L(300,480,E(p,.2,.9)),12); }},
+      {d:3.4,cap:'Good automation gives each the work they do best.',f(P,p,T){ const tilt=(1-E(p,0,.6))*.25*Math.sin(T*3+1); P.c(INK.w,4).l(640,620,640,260).push(640,260,tilt).l(-280,0,280,0).l(-260,0,-300,140,1).l(-260,0,-220,140,1).l(260,0,220,160,1).l(260,0,300,160,1).pop();
+        P.c(INK.t,4).robot(380,380+tilt*-260,.9); P.c(INK.a,4).head(900,410+tilt*260,.7); if(p>.7) P.c(INK.g,6).check(640,180,1.2); }},
+    ]},
+    p20_1:{title:'Why a shared picture?',scenes:[
+      {d:3.2,cap:'Three people, three different pictures of the mission…',f(P,p,T){ [[320,INK.t,0],[640,INK.p,1],[960,INK.a,2]].forEach(([x,c,i])=>{ P.c(c,4).head(x,520,.9,true); P.c(c,4).rc(x-110,200,220,160); P.dot(x-60+i*50,240+i*40,10); }); P.c(INK.r,5).ga(E(p,.4,.7)).t('≠',480,280,70).t('≠',800,280,70).ga(1); }},
+      {d:3.6,cap:'…one shared picture keeps everyone in sync.',f(P,p,T){ const m=E(p,0,.5); [[320,INK.t],[640,INK.p],[960,INK.a]].forEach(([x,c])=>{ P.c(c,4).head(x,540,.9,true); P.c(c,3).ga(E(p,.5,.8)).dash(x,500,640,330).ga(1); });
+        const w=L(220,560,m), h=L(160,220,m); P.c(INK.w,4).rc(640-w/2,140,w,h); P.c(INK.a,5).dot(640+Math.sin(T)*80*m,140+h/2,12); if(p>.8) P.c(INK.g,6).check(980,200,1.2); }},
+    ]},
+    p24_0:{title:'Where it started',scenes:[
+      {d:3.2,cap:'A drone hovers over the neighborhood.',f(P,p,T){ P.c(INK.w,4); [180,480,800,1100].forEach(x=>P.house(x,600,1.1)); const x=L(100,800,E(p,0,1)); P.c(INK.a,4).drone(x,190+Math.sin(T*3)*12,1.1,T); P.c(INK.a,2).arc(x,200,110,.3,1.2).arc(x,200,110,1.9,2.8); }},
+      {d:3.6,cap:'Neighbors look up: whose is it, and what is it doing?',f(P,p,T){ P.c(INK.w,4); [180,480,800,1100].forEach(x=>P.house(x,600,1.1)); P.c(INK.a,4).drone(800,190+Math.sin(T*3)*12,1.1,T);
+        [[330,INK.t],[640,INK.p],[960,INK.g]].forEach(([x,c],i)=>{ const a=E(p,i*.2,i*.2+.2); if(a>0){ P.c(c,4).ga(a).person(x,460-a*20,.8).ga(1); P.c(INK.a,4).ga(a).t('?',x+40,390,60).ga(1);} }); }},
+    ]},
+    p25_0:{title:'How we learned',scenes:[
+      {d:4,cap:'We started by listening.',f(P,p,T){ const n=Math.floor(E(p,0,.9)*48); const cols=[INK.t,INK.p,INK.w,INK.a];
+        for(let q=0;q<n;q++){ const x=150+(q%12)*90, y=170+Math.floor(q/12)*95; P.c(cols[q%4],3).o(x,y,34,24,1).pl([[x-12,y+20],[x-22,y+38],[x-2,y+22]],false,1); }
+        P.c(INK.a,5).t(String(n),1140,620,70); }},
+      {d:3,cap:'48+ conversations shaped what we built.',f(P,p,T){ P.c(INK.a,6).t('48+',640,330,180+Math.sin(T*3)*6); P.c(INK.w,4).ga(E(p,.2,.5)).t('operators · regulators · neighbors',640,520,46).ga(1); }},
+    ]},
+    p26_0:{title:'What people worried about',scenes:[
+      {d:3.4,cap:'People worried about being watched at home.',f(P,p,T){ P.c(INK.w,4).rc(380,170,520,420).l(640,170,640,590,1).l(380,380,900,380,1); P.c(INK.t,5).o(640,380,130,64).o(640+Math.sin(T*2)*30,380,40); P.c(INK.a,4).drone(L(1240,980,E(p,0,.6)),170,.8,T); P.c(INK.a,2).ga(.6).pl([[980,190],[700,560],[900,560]],true,1).ga(1); }},
+      {d:3.4,cap:'So privacy became the first thing we designed for.',f(P,p,T){ P.c(INK.w,4).rc(380,170,520,420); const c=E(p,0,.6); P.c(INK.p,4); for(let q=0;q<6;q++){ const x=L(390,620,c)-q*8; P.l(x,180,x+Math.sin(q+T)*6,580,1); const x2=L(890,660,c)+q*8; P.l(x2,180,x2+Math.sin(q+T)*6,580,1); }
+        P.c(INK.g,5).ga(E(p,.6,.85)).pl([[640,250],[740,290],[730,420],[640,500],[550,420],[540,290]],true).check(640,380,1.2).ga(1); }},
+    ]},
+    p27_0:{title:'Who needs this?',scenes:[
+      {d:2.6,cap:'Everyone who lives near drone activity…',f(P,p,T){ P.c(INK.p,4).o(640,390,330*E(p,0,.7),270*E(p,0,.7)).ga(E(p,.5,.8)).t('TAM',640,160,46).ga(1); }},
+      {d:2.6,cap:'…the people who care most about privacy…',f(P,p,T){ P.c(INK.p,4).o(640,390,330,270).t('TAM',640,160,46); P.c(INK.t,4).o(640,450,210*E(p,0,.7),190*E(p,0,.7)).ga(E(p,.5,.8)).t('SAM',640,300,44).ga(1); }},
+      {d:3,cap:'…and who we can reach first.',f(P,p,T){ P.c(INK.p,4).o(640,390,330,270).t('TAM',640,160,46); P.c(INK.t,4).o(640,450,210,190).t('SAM',640,300,44); const s=E(p,0,.6)*(1+Math.sin(T*5)*.04); P.c(INK.a,5).o(640,520,100*s,96*s).ga(E(p,.4,.7)).t('SOM',640,520,44).ga(1); }},
+    ]},
+    p28_0:{title:'How the app works',scenes:[
+      {d:2.8,cap:'A drone is detected nearby, and your phone buzzes.',f(P,p,T){ const b=Math.sin(T*40)*4*E(p,.2,.4); P.c(INK.w,4).phone(540+b,160,200,390); P.c(INK.r,4).bell(640+b,330,.9,T,1); P.c(INK.a,4).drone(1000,200,.9,T); }},
+      {d:3,cap:'See exactly where it is on the map.',f(P,p,T){ P.c(INK.w,4).phone(540,160,200,390); P.c(INK.t,3).pl([[560,420],[620,330],[680,380],[720,300]]).pl([[560,250],[720,470]],false,1); const x=L(570,710,(T*.3)%1); P.c(INK.a,4).o(x,360,18).dot(x,360,6); }},
+      {d:3,cap:'Report it in a tap.',f(P,p,T){ P.c(INK.w,4).phone(540,160,200,390); const f=E(p,.1,.5); P.c(INK.g,4).l(610,470,610,L(470,270,f)).pl([[610,L(470,270,f)],[700,L(500,300,f)],[610,L(530,330,f)]]); if(p>.6) P.c(INK.g,6).check(640,520,1); }},
+    ]},
+    p33_0:{title:'What fatigue does',scenes:[
+      {d:3,cap:'Fresh: reactions are fast and consistent.',f(P,p,T){ P.c(INK.w,4).clock(250,380,120,T*2); P.c(INK.w,3).l(480,560,1210,560); const rr=rng(9), n=Math.floor(E(p,0,.9)*22); for(let q=0;q<n;q++){ P.c(INK.g,3).dot(520+rr()*300,470+(rr()-.5)*30,7); } }},
+      {d:3.6,cap:'Fatigued: reactions scatter and become unpredictable.',f(P,p,T){ P.c(INK.w,4).clock(250+Math.sin(T*15)*E(p,0,.3)*5,380,120,T*2); P.c(INK.w,3).l(480,560,1210,560); const rr=rng(9); for(let q=0;q<22;q++) P.c(INK.g,3).dot(520+rr()*300,470+(rr()-.5)*30,7);
+        const r2=rng(4), n=Math.floor(E(p,0,.9)*26); for(let q=0;q<n;q++){ P.c(q%3?INK.r:INK.a,3).dot(860+r2()*330,470+(r2()-.5)*260,7); } P.c(INK.w,3).t('fresh',670,610,38).t('fatigued',1030,610,38); }},
+    ]},
+    p34_0:{title:'Why breathing?',scenes:[
+      {d:3.6,cap:'Breathing speeds up as the workload builds.',f(P,p,T){ const rate=L(.9,2.4,E(p,0,1)), b=1+Math.sin(T*rate*3)*.12; torso(P,b); P.c(INK.r,3).ga(.6).dash(600,300,1220,300).ga(1); wave(P,T,rate); P.c(INK.w,4).t(`${Math.round(L(14,22,E(p,0,1)))} / min`,1120,560,48); }},
+      {d:3.6,cap:'Past 23 breaths a minute, the system steps in to help.',f(P,p,T){ const v=L(22,25,E(p,0,.5)), b=1+Math.sin(T*7)*.12; torso(P,b); P.c(INK.r,3).dash(600,300,1220,300); wave(P,T,2.6,L(400,330,E(p,0,.5))); P.c(v>=23?INK.r:INK.w,4).t(`${Math.round(v)} / min`,1120,560,48);
+        if(v>=23){ P.c(INK.r,4).ga(.55+.45*Math.sin(T*6)).t('over the limit',910,212,40).ga(1); } if(v>=23){ P.c(INK.t,4).ga(E(p,.5,.75)).robot(900,170,.7).t('assist on',1030,170,40).ga(1); } }},
+    ]},
+    s02:{title:'What travelers actually want',scenes:[
+      {d:3.4,cap:'A chatty neighbor can turn a flight into work.',f(P,p,T){ rowSeats(P); P.c(INK.p,4).person(480,330,.9); P.c(INK.t,4).person(800,330,.9);
+        const n=Math.floor(E(p,0,.8)*4); for(let q=0;q<n;q++){ const x=560+q*40, y=230-q*36; P.c(INK.p,3).o(x,y,46,26,1).l(x-26,y-4,x+22,y-4,1).l(x-26,y+8,x+10,y+8,1); }
+        P.c(INK.r,4).ga(E(p,.5,.8)).t('…',860,250,70).ga(1); }},
+      {d:3.6,cap:'Most people just want a quiet row.',f(P,p,T){ rowSeats(P); const m=E(p,0,.5); P.c(INK.t,4).person(480,330,.9); P.c(INK.t,4).person(800,330,.9);
+        P.c(INK.t,4).ga(m).arc(480,330,30,Math.PI*1.1,Math.PI*1.9).arc(800,330,30,Math.PI*1.1,Math.PI*1.9).ga(1);
+        P.c(INK.a,4).ga(E(p,.4,.7)).t('quiet',640,220,52).ga(1); if(p>.75) P.c(INK.g,6).check(640,560,1.3); }},
+    ]},
+    s05:{title:'Choosing an airline',scenes:[
+      {d:3.4,cap:'Two flights. Same time, same price.',f(P,p,T){ flightCard(P,170,200,'Airline A','$240',0,0,0); flightCard(P,730,200,'Airline B','$240',0,0,0);
+        const t=E(p,.2,.9); cursor(P,L(640,360,t),L(660,415,t),0); }},
+      {d:3.4,cap:'Then they notice one offers seatmate matching.',f(P,p,T){ flightCard(P,170,200,'Airline A','$240',0,0,0); flightCard(P,730,200,'Airline B','$240',E(p,0,.3),0,0);
+        cursor(P,360+Math.sin(T*5)*6,415,0); P.c(INK.a,4).ga(E(p,.4,.7)).t('?',420,370,60).ga(1); }},
+      {d:3.8,cap:'So they book the other airline instead.',f(P,p,T){ const fade=E(p,.6,.9); P.ga(1-.6*fade); flightCard(P,170,200,'Airline A','$240',0,0,0); P.ga(1);
+        flightCard(P,730,200,'Airline B','$240',1,p>.6?1:0,0); const t=E(p,0,.5); cursor(P,L(360,920,t),415,p>.52&&p<.75?E(p,.52,.75):0); if(p>.8) P.c(INK.g,6).check(1170,420,1.3);
+        const k=E(p,.62,.85); P.c(INK.a,5).ga(k).t('60% would make this switch',640,548+(1-k)*20,62).c(INK.m,3).t('15 of 25 travelers surveyed',640,606+(1-k)*20,34).ga(1); }},
+    ]},
+    s07:{title:'Why it pays off without a fee',scenes:[
+      {d:3.4,cap:'If nobody pays for matching, the feature itself earns $0.',f(P,p,T){ const a=Math.sin(T*2.4)*.12;
+        P.c(INK.w,4).push(640,360,a).pl([[-170,-90],[120,-90],[200,0],[120,90],[-170,90]],true).o(130,0,16).pop();
+        P.c(INK.a,6).t('$0',610+Math.sin(a)*20,355,120); P.c(INK.w,3).t('matching fee',640,520,44); }},
+      {d:5,cap:'But every traveler who switches brings a whole ticket.',f(P,p,T){ travelers(P,p,T,false); }},
+      {d:4,cap:'More customers means more money, even from a free feature.',f(P,p,T){ P.ga(1-.88*E(p,0,.25)); travelers(P,1,T,true); P.ga(1);
+        P.c(INK.a,6).ga(E(p,0,.3)).t('15 × $240 = $3,600',640,250,84).ga(1);
+        P.c(INK.w,3).ga(E(p,.25,.5)).t('in ticket sales out of 25 travelers, from a feature that charged $0',640,330,36).t('($240 is an example fare)',640,375,30).ga(1);
+        if(p>.6) P.c(INK.g,6).check(640,440,1.2); }},
+    ]},
+  };
+  // scene helpers
+  function flightCard(P,x,y,name,price,badge,booked,_){ P.c(INK.w,4).rc(x,y,380,260).t(name,x+190,y+48,46).c(INK.m,3).t('9:40 → 12:15 · nonstop',x+190,y+102,32);
+    P.c(INK.a,4).t(price,x+190,y+156,56); P.c(booked?INK.g:INK.w,4).rc(x+90,y+194,200,46).t(booked?'Booked ✓':'Select',x+190,y+218,34);
+    if(badge>0.01){ const b=badge*(1+Math.sin(performance.now()/180)*.03*badge); P.c(INK.t,4).ga(badge).push(x+190,y-46,0,b).rc(-170,-28,340,56).t('★ seatmate matching',0,0,36).pop().ga(1); } }
+  function cursor(P,x,y,click){ P.c(INK.w,3).pl([[x,y],[x,y+46],[x+12,y+36],[x+22,y+56],[x+31,y+52],[x+21,y+32],[x+36,y+32]],true,2);
+    if(click>0){ P.c(INK.g,3).ga(1-click).o(x,y,20+click*60,20+click*60,1).ga(1); } }
+  // 25 travelers; 15 walk from airline A to airline B (matches the survey: 15 of 25 would switch)
+  const MOVERS=[0,2,3,5,7,8,10,12,13,15,17,19,20,22,24];
+  function travelers(P,p,T,done){ P.c(INK.m,3).t('Airline A',330,190,42).l(170,210,490,210,1); P.c(INK.t,3).t('Airline B (matching)',950,190,42).l(790,210,1110,210,1);
+    let arrived=0;
+    for(let i=0;i<25;i++){ const sx=200+(i%5)*65, sy=270+Math.floor(i/5)*62, m=MOVERS.indexOf(i);
+      if(m<0){ P.c(INK.m,3).head(sx,sy,.42); continue; }
+      const pp=done?1:E(p,m*.045,m*.045+.3), tx=820+(m%5)*65, ty=270+Math.floor(m/5)*62;
+      if(pp>=.98) arrived++;
+      P.c(pp>=.98?INK.t:INK.w,3).head(L(sx,tx,pp),L(sy,ty,pp)-Math.sin(pp*Math.PI)*40,.42); }
+    if(!done){ P.c(INK.a,5).t('$'+(arrived*240).toLocaleString(),950,600,64); P.c(INK.w,3).t(arrived+' new bookings',950,650,32); } }
+  function rowSeats(P){ P.c(INK.w,3); [400,560,720,880].forEach(x=>{ P.rc(x-60,420,120,90,1).rc(x-60,330,22,100,1); }); P.l(300,520,980,520); }
+  function s1ground(P,crack){ P.c(INK.w,3).pl([[40,520],[260,470],[500,505],[720,440],[960,470],[1240,450]]); P.c(INK.w,4).l(60,610,520,575).l(640,566,1220,530);
+    const cr=[[520,575],[548,548],[566,590],[592,556],[640,566]]; if(crack>0) P.c(INK.r,4).pl(cr.slice(0,1+Math.round(crack*4))); }
+  function s1house(P,f,T){ P.c(INK.t,4).house(1020,470,1.15); P.c(INK.r,4).flame(930,470,1.1*f,T).flame(1110,476,1.25*f,T); P.c(INK.a,4).flame(1170,480,.8*f,T); }
+  function s1amb(P,x,stop){ P.c(INK.w,4).rc(x,545,150,56).o(x+40,612,16).o(x+118,612,16); P.c(INK.r,4).l(x+75,556,x+75,590).l(x+58,573,x+92,573); }
+  // EMSAD tiltrotor (matches the UAV design render), 3/4 view from above, nose to the right:
+  // long fuselage, high wing with ailerons, tail with rudder and tilting elevator, 2 large wing rotors + 2 smaller tail rotors.
+  // tilt 0 = hover (rotor disks flat), tilt 1 = cruise (disks facing forward). Arrows sweep with the rotors while they convert.
+  function vtol(P,x,y,tilt,T,s=1.15,arrows=0){ P.push(x,y,0,s);
+    const W=INK.w, spin=1+Math.sin(T*42)*.2, spin2=1+Math.cos(T*47)*.2;
+    const rotor=(px,py,big,sp)=>{ const R=big?56:38, rx=L(R,10,tilt)*sp, ry=L(10,R,tilt), cx=px+L(0,R*.65,tilt), cy=py-L(30,0,tilt);
+      P.c(W,3).l(px,py,L(px,cx-6,tilt),L(cy,py,tilt),1); P.c(INK.t,4).o(cx,cy,rx,ry,1); P.c(INK.t,2).ga(.55).l(cx-rx*.85,cy-ry*.2,cx+rx*.85,cy+ry*.2,1).ga(1);
+      if(arrows>0.02){ const a0=-Math.PI/2, a1=a0+Math.max(.15,tilt)*Math.PI/2, rr=R+26; P.c(INK.a,4).ga(arrows).arc(px,py,rr,a0,a1,2);
+        const hx=px+Math.cos(a1)*rr, hy=py+Math.sin(a1)*rr, tx=-Math.sin(a1), ty=Math.cos(a1);
+        P.l(hx,hy,hx-tx*18-ty*10,hy-ty*18+tx*10,1).l(hx,hy,hx-tx*18+ty*10,hy-ty*18-tx*10,1).ga(1); } };
+    // far side first: far tail rotor, far wing + nacelle + rotor
+    P.c(W,4).pl([[-196,-8],[-176,-62],[-204,-62],[-228,-6]],false,2); rotor(-190,-62,false,spin2);
+    P.c(W,4).pl([[62,-20],[112,-150],[58,-150],[-22,-20]],false,2); P.c(W,2).l(70,-142,22,-60,1);
+    P.c(W,4).o(88,-92,34,9,1); rotor(108,-92,true,spin);
+    // fuselage, canopy, sensor ball
+    P.c(W,4).pl([[-236,-6],[-170,-17],[-40,-25],[110,-23],[190,-11],[238,6],[190,20],[110,27],[-40,25],[-170,12],[-236,4]],true);
+    P.c(INK.p,3).pl([[120,-19],[160,-30],[200,-10]],false,1); P.c(INK.a,4).o(176,28,10,10,1);
+    // tail: rudder fin and near elevator
+    P.c(W,4).pl([[-170,-15],[-212,-96],[-240,-96],[-230,-6]],false,2); P.c(W,2).l(-226,-88,-232,-14,1);
+    P.c(W,4).pl([[-192,10],[-212,64],[-242,64],[-230,8]],false,2); rotor(-226,64,false,2-spin2);
+    // near wing with aileron, nacelle and rotor
+    P.c(W,4).pl([[62,4],[12,150],[-50,150],[-22,4]],false,2); P.c(W,2).l(-40,142,-30,70,1);
+    P.c(W,4).o(36,82,34,9,1); rotor(56,82,true,2-spin);
+    P.pop(); return P; }
+  function seat(P,s,reach,cx){ P.c(INK.w,4).l(400,560,560,560).l(410,560,398,380).l(430,560,430,640).l(540,560,540,640).o(470,296,34).l(470,330,482,540).l(482,540,610,548).l(610,548,618,640);
+    const hx=L(600,cx-40,reach*0.7), hy=L(440,432,reach); P.l(476,384,560,440).l(560,440,hx,hy); P.c(INK.a,4).rc(cx-20,420,200,34).dot(cx,437,8); }
+  function desk(P,slump,chair){ P.c(INK.w,4).l(680,560,1180,560); P.c(INK.w,4).rc(960,400,180,130).l(1050,530,1050,560,1);
+    const hx=L(790,830,slump), hy=L(330,380,slump); P.o(hx,hy,32).pl([[hx-4,hy+32],[L(780,770,slump),470],[800,560]]).l(L(782,790,slump),430,930,480);
+    if(chair>0){ P.c(INK.a,5).ga(chair).pl([[750,560],[742,440],[760,380]]).l(740,500,770,500).ga(1); } }
+  function trees(P,off,grow=1){ P.c(INK.g,4); for(let q=0;q<16;q++){ const x=((q*96-off)%1440+1440)%1440-60, near=Math.abs(x-560)<160?grow:1; P.tree(x,640,(0.9+((q*13)%5)/10)*near); } }
+  function crew(P,on){ [[300,INK.t],[640,INK.p],[980,INK.a]].forEach(([x,c],i)=>{ P.c(on[i]>.5?c:INK.m,4).ga(.35+.65*on[i]).head(x,500,.95,true).ga(1); }); }
+  function torso(P,b){ P.c(INK.w,4).pl([[200,180],[170,300],[180,600]]).pl([[480,180],[510,300],[500,600]]).o(340,140,46); P.c(INK.t,4).o(290,360,62*b,110*b).o(392,360,62*b,110*b); P.c(INK.a,8).l(176,430,506,430,1); }
+  function wave(P,T,rate,cy=400,limitY=300){ const pts=[]; for(let x=600;x<=1220;x+=6) pts.push([x,cy+Math.sin((x-600)*.025*rate-T*rate*3)*70]);
+    // split into runs below (blue) and above (red) the limit line
+    let run=[pts[0]], over=pts[0][1]<limitY;
+    const flush=()=>{ if(run.length>1) P.c(over?INK.r:INK.p,over?6:4).pl(run,false,1); };
+    for(let i=1;i<pts.length;i++){ const o=pts[i][1]<limitY; if(o!==over){ const [x0,y0]=pts[i-1],[x1,y1]=pts[i], f=(limitY-y0)/(y1-y0), m=[x0+(x1-x0)*f,limitY]; run.push(m); flush(); run=[m]; over=o; } run.push(pts[i]); }
+    flush(); }
+
+  // draw one frame of a cartoon onto a canvas; static=true gives the final frame on a dark ground for line tracing
+  const CW_=1280, CH_=800;
+  function storyLen(st){ return STORIES[st.id].scenes.reduce((s,x)=>s+x.d,0); }
+  function drawCartoon(st,c,T,isStatic){
+    const S=STORIES[st.id], total=storyLen(st), hold=2.6, cyc=total+hold;
+    let tt=isStatic?total-0.001:(T%cyc); if(tt>total) tt=total-0.001;
+    let k=0, acc=0; while(k<S.scenes.length-1&&tt>acc+S.scenes[k].d){ acc+=S.scenes[k].d; k++; }
+    const sc=S.scenes[k], p=clamp((tt-acc)/sc.d,0,1);
+    c.clearRect(0,0,CW_,CH_);
+    if(isStatic){ c.fillStyle='#202020'; c.fillRect(0,0,CW_,CH_); }
+    else{ c.fillStyle='rgba(13,18,32,0.9)'; rr_(c,8,8,CW_-16,CH_-16,26); c.fill(); c.strokeStyle='rgba(255,181,71,0.45)'; c.lineWidth=3; rr_(c,8,8,CW_-16,CH_-16,26); c.stroke(); }
+    const P=pen(c,st.k*977+Math.floor((isStatic?0:T)*9)*31);   // pen re-seeds 9x a second: hand-drawn "boil"
+    P.c(INK.a,3).t(S.title.toUpperCase(),60,60,34,'left');
+    for(let q=0;q<S.scenes.length;q++){ P.c(q===k?INK.a:INK.m,3); if(q===k) P.dot(1150+q*34,60,9); else P.o(1150+q*34,60,8,8,1); }
+    c.save(); sc.f(P,p,T); c.restore(); c.globalAlpha=1;
+    // caption: types on, big and clear
+    let fs=58; c.font=`700 ${fs}px Caveat,"Segoe Print","Comic Sans MS",cursive`;
+    while(fs>34&&c.measureText(sc.cap).width>1160){ fs-=2; c.font=`700 ${fs}px Caveat,"Segoe Print","Comic Sans MS",cursive`; }
+    const shown=isStatic?sc.cap:sc.cap.slice(0,Math.ceil(sc.cap.length*clamp(p/.35,0,1)));
+    P.c(INK.w,3).t(shown,640,722,fs);
+  }
+  function rr_(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+  function drawStory(st){ const cv=document.createElement('canvas'); cv.width=CW_; cv.height=CH_; drawCartoon(st,cv.getContext('2d'),0,true); return cv; }
+
+  /* ---------- content model ---------- */
+  const chapters=CHAPTERS.map(c=>({...c,slides:(c.slides||[]).filter(s=>s.id).map(s=>({...s,a:A[s.id]}))}));
+  const G=[]; chapters.forEach((c,ci)=>c.slides.forEach((s,j)=>{s.ci=ci;s.j=j;s.k=G.length;G.push(s);}));
+  const beats=[];
+  const ST=[];
+  chapters.forEach((c,ci)=>{ c.start=beats.length; c.P=c.slides.length; beats.push({type:'card',ci});
+    c.slides.forEach((s,j)=>{ s.beat=beats.length; beats.push({type:'slide',ci,g:s.k});
+      if(STORIES[s.id]&&j<c.slides.length-1){ const st={story:true,id:s.id,fromK:s.k,a:1.6,ci,beat:beats.length}; ST.push(st); beats.push({type:'story',ci,st}); } });
+    c.end=beats.length-1; });
+  const ALL=G.concat(ST); ALL.forEach((g,i)=>g.k=i);
+  const LAST=beats.length-1;
+
+  document.addEventListener('click',e=>{
+    if(e.target.id==='copy'){ const m=$('mail');
+      navigator.clipboard.writeText(m.textContent).then(()=>{e.target.textContent='Copied'},()=>{const r=document.createRange();r.selectNodeContents(m);const s=getSelection();s.removeAllRanges();s.addRange(r);e.target.textContent='Press Ctrl+C'}); }
+    if(e.target.id==='tomap') openMap&&openMap();
+  });
+
+  /* ---------- fallback: reduced motion or no WebGL ---------- */
+  let webgl=false; try{ const c=document.createElement('canvas'); webgl=!!(window.THREE&&(c.getContext('webgl')||c.getContext('experimental-webgl'))); }catch(e){}
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches || !webgl){
+    const st=$('static');
+    chapters.forEach(c=>{ const s=document.createElement('section');
+      s.innerHTML=`<div class="card">${c.card}</div>`+(c.P?`<div class="grid">${c.slides.map(x=>`<figure><img loading="lazy" src="img/${x.id}.jpg" alt="${x.cap}"><figcaption>${x.cap}</figcaption></figure>`).join('')}</div>`:'');
+      st.appendChild(s); });
+    document.body.classList.add('flat'); var openMap=null; return;
+  }
+
+  /* ---------- cards over the scene ---------- */
+  const cardsEl=$('cards');
+  chapters.forEach(c=>{ const el=document.createElement('div'); el.className='card'; el.innerHTML=c.card; cardsEl.appendChild(el); c.cardEl=el;
+    if(c.P){ const e=document.createElement('div'); e.className='edge'; cardsEl.appendChild(e); c.edge=e; } });
+
+  /* ---------- three.js scene ---------- */
+  const stage=$('stage');
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2)); renderer.outputEncoding=THREE.sRGBEncoding;
+  stage.insertBefore(renderer.domElement,cardsEl);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(50,1,0.01,60);
+  const UP=new THREE.Vector3(0,1,0);
+
+  // world placement: each slide sits inside the stroke cloud of the one before, turned to a new angle
+  const D=1.5, pr=rng(11);
+  let P=new THREE.Vector3(), yaw=0, pitch=0;
+  G.forEach((g,k)=>{
+    const n=new THREE.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
+    const right=new THREE.Vector3().crossVectors(UP,n).normalize(), up=new THREE.Vector3().crossVectors(n,right).normalize();
+    Object.assign(g,{P:P.clone(),n,right,up,C:P.clone().addScaledVector(n,D),side:k%2?1:-1});
+    const side=g.side, chapterBreak=G[k+1]&&G[k+1].ci!==g.ci;
+    // nest the next slide deep inside this slide's drawing: from its camera, this drawing overflows the screen around it
+    P=P.clone().addScaledVector(n,chapterBreak?-1.5:-0.95).addScaledVector(right,side*(0.05+pr()*0.07)).addScaledVector(up,(pr()-.5)*0.08);
+    yaw+=side*(0.16+pr()*0.12)*(chapterBreak?2:1);
+    pitch=((k%3)?-1:1)*(0.025+pr()*0.05);
+  });
+
+  // story stops sit out to the side between two slides, turned toward the path
+  ST.forEach(st=>{ const a=G[st.fromK], b=G[st.fromK+1], side=a.side;
+    const n=a.n.clone().applyAxisAngle(UP,side*0.6).normalize();
+    const right=new THREE.Vector3().crossVectors(UP,n).normalize(), up=new THREE.Vector3().crossVectors(n,right).normalize();
+    const P_=a.P.clone().lerp(b.P,.5).addScaledVector(a.right,side*1.7).addScaledVector(UP,0.12);
+    Object.assign(st,{P:P_,n,right,up,C:P_.clone().addScaledVector(n,D),side:-side}); });
+
+  // camera pose for every beat
+  function oblique(g,dist,ang,lift=0.25){ const dir=g.n.clone().applyAxisAngle(UP,ang).addScaledVector(UP,lift).normalize();
+    const tgt=g.P.clone().addScaledVector(g.n,-0.35); return {pos:tgt.clone().addScaledVector(dir,dist),tgt,fov:52,card:true}; }
+  let vw=1,vh=1;
+  function slideFov(g){ const f=Math.max(0.3,(vh-250)/vh), va=vw/vh; const Hh=Math.max(0.5/f,(g.a/2)/(0.8*va)); return 2*Math.atan(Hh/D)*180/Math.PI; }
+  function poseFor(b){
+    const B=beats[b], c=chapters[B.ci];
+    if(B.type==='slide'){ const g=G[B.g]; return {pos:g.C.clone(),tgt:g.P.clone(),fov:slideFov(g),g}; }
+    if(B.type==='story'){ const g=B.st; return {pos:g.C.clone(),tgt:g.P.clone(),fov:slideFov(g),g}; }
+    if(c.P) return oblique(G[c.slides[0].k],2.7,(B.ci%2?-1:1)*0.85);
+    if(b===0) return oblique(G[0],4.2,0.95,0.35);
+    const prev=G[chapters.slice(0,B.ci).reduce((m,x)=>x.P?x.slides[x.P-1].k:m,0)];
+    return oblique(prev,b===LAST?5:3.4,B.ci%2?1.25:-1.25,0.3);
+  }
+  let poses=[];
+  function computePoses(){ poses=beats.map((_,b)=>poseFor(b)); }
+
+  /* ---------- drawings: each slide's contents traced as solid, continuous ink lines in 3D ----------
+     The tracing runs on a background thread so transitions never stall. Every contour is a connected polyline; each point is
+     pushed along its sight line from the slide's camera, so from that camera the drawing lines up into the slide. */
+  const lineVS=`attribute vec3 acol; varying vec3 vC; varying float vD;
+    void main(){ vC=acol; vec4 mv=modelViewMatrix*vec4(position,1.0); vD=-mv.z; gl_Position=projectionMatrix*mv; }`;
+  // uR = screen rectangle of the slide you are sitting on; lines are masked out of it so that slide stays clear
+  const lineFS=`uniform float uO; uniform vec4 uR; uniform float uM; varying vec3 vC; varying float vD;
+    void main(){ float a=uO*smoothstep(0.04,0.35,vD)*(1.0-smoothstep(7.0,12.0,vD));
+      vec2 f=gl_FragCoord.xy; float dx=max(uR.x-f.x,f.x-uR.z), dy=max(uR.y-f.y,f.y-uR.w), out_=max(dx,dy);
+      a*=1.0-uM*(1.0-smoothstep(-2.0,26.0,out_));
+      if(a<0.003) discard; gl_FragColor=vec4(vC,a); }`;
+
+  function traceJob(j){
+    const {k,W,H,px,CW,CH,cd,a,P,C,R,U}=j;
+    const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+    const rng=seed=>()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+    const TINT=[[1,.72,.32],[.45,.85,.78],[.66,.72,1],[.95,.95,.97]];
+    const cnt={}; const vote=i=>{const q=(px[i]>>4)+'_'+(px[i+1]>>4)+'_'+(px[i+2]>>4); cnt[q]=(cnt[q]||0)+1;};
+    for(let x=0;x<W;x+=2){ vote(x*4); vote(((H-1)*W+x)*4); } for(let y=0;y<H;y+=2){ vote(y*W*4); vote((y*W+W-1)*4); }
+    const bk=Object.keys(cnt).reduce((p,q)=>cnt[p]>cnt[q]?p:q).split('_').map(v=>(+v*16+8));
+    const darkBg=(bk[0]+bk[1]+bk[2])/3<128;
+    const content=(r,g,b)=>{ const l=(r*.299+g*.587+b*.114)/255, sat=(Math.max(r,g,b)-Math.min(r,g,b))/255;
+      return darkBg ? clamp(Math.max((l-.165)/.06,(sat-.07)/.06),0,1) : clamp(Math.max((.93-l)/.06,(sat-.05)/.06),0,1); };
+    for(let i=0;i<cd.length;i+=4) cd[i+3]=Math.round(255*content(cd[i],cd[i+1],cd[i+2]));
+    const N=W*H, Lm=new Float32Array(N); for(let i=0;i<N;i++) Lm[i]=(px[i*4]*.299+px[i*4+1]*.587+px[i*4+2]*.114)/255;
+    const M=new Float32Array(N), Dq=new Uint8Array(N);
+    for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){ const i=y*W+x;
+      const gx=(Lm[i-W+1]+2*Lm[i+1]+Lm[i+W+1])-(Lm[i-W-1]+2*Lm[i-1]+Lm[i+W-1]);
+      const gy=(Lm[i+W-1]+2*Lm[i+W]+Lm[i+W+1])-(Lm[i-W-1]+2*Lm[i-W]+Lm[i-W+1]);
+      M[i]=Math.hypot(gx,gy); let an=Math.atan2(gy,gx); if(an<0) an+=Math.PI; Dq[i]=Math.round(an/(Math.PI/4))%4; }
+    const Cn=new Uint8Array(N); for(let i=0;i<N;i++) Cn[i]=content(px[i*4],px[i*4+1],px[i*4+2])>.5?1:0;
+    const Dl=new Uint8Array(N); for(let y=2;y<H-2;y++) for(let x=2;x<W-2;x++){ let f=0; for(let yy=-2;yy<=2&&!f;yy++) for(let xx=-2;xx<=2;xx++) if(Cn[(y+yy)*W+x+xx]){f=1;break;} Dl[y*W+x]=f; }
+    const OFF=[[1,0],[1,1],[0,1],[-1,1]], E=new Uint8Array(N);
+    for(let y=4;y<H-4;y++) for(let x=4;x<W-4;x++){ const i=y*W+x, m=M[i]; if(m<0.28||!Dl[i]) continue;
+      const o=OFF[Dq[i]]; if(m>=M[i+o[1]*W+o[0]]&&m>=M[i-o[1]*W-o[0]]) E[i]=1; }
+    const N8=[[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]], ORD=[0,1,7,2,6,3,5,4], chains=[];
+    for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){ const i=y*W+x; if(E[i]!==1) continue;
+      const ch=[x,y]; E[i]=2; let cx=x, cy=y, last=-1;
+      for(let guard=0;guard<4000;guard++){ let found=-1;
+        for(let t=0;t<8;t++){ const q=last<0?t:(last+ORD[t])%8, nx=cx+N8[q][0], ny=cy+N8[q][1];
+          if(nx<1||ny<1||nx>=W-1||ny>=H-1) continue; if(E[ny*W+nx]===1){ found=q; break; } }
+        if(found<0) break; cx+=N8[found][0]; cy+=N8[found][1]; E[cy*W+cx]=2; ch.push(cx,cy); last=found; }
+      if(ch.length>=12) chains.push(ch); }
+    chains.sort((p,q)=>q.length-p.length);
+    let budget=52000; const keep=[]; for(const c of chains){ if(budget<=0) break; keep.push(c); budget-=c.length; }
+    const r=rng(k*7919+3), ph=[r()*6.28,r()*6.28,r()*6.28,r()*6.28];
+    const depth=(X,Y)=>1+0.34*Math.sin(X*3.1+ph[0])*Math.cos(Y*2.6+ph[1])+0.22*Math.sin(X*7.3+Y*5.1+ph[2])+0.12*Math.cos(Y*9.7+ph[3]);
+    const pos=[], col=[];
+    const put=(px_,py_,s,out)=>{ const X=(px_/W-.5)*a, Y=.5-py_/H;
+      for(let d=0;d<3;d++){ const q=P[d]+R[d]*X+U[d]*Y; out[d]=C[d]+(q-C[d])*s; } };
+    const colour=(x,y,tint,out)=>{ const i=(y*W+x)*4; let rr=px[i]/255,gg=px[i+1]/255,bb=px[i+2]/255; const l=rr*.299+gg*.587+bb*.114, sat=Math.max(rr,gg,bb)-Math.min(rr,gg,bb);
+      const t=TINT[tint];
+      if(sat<.18){ const m=darkBg?.25:.6; rr=rr*(1-m)+t[0]*m; gg=gg*(1-m)+t[1]*m; bb=bb*(1-m)+t[2]*m; }
+      if(!darkBg&&l<.5){ rr=(1-rr*.55)*.5+t[0]*.5; gg=(1-gg*.55)*.5+t[1]*.5; bb=(1-bb*.55)*.5+t[2]*.5; }
+      const lift=Math.max(0,.62-(rr*.299+gg*.587+bb*.114)); out[0]=Math.min(1,rr+lift); out[1]=Math.min(1,gg+lift); out[2]=Math.min(1,bb+lift); };
+    const A3=[0,0,0], B3=[0,0,0], CA=[0,0,0], CB=[0,0,0];
+    for(let pass=0;pass<2;pass++){
+      keep.forEach((ch,ci)=>{ if(pass===1&&ci%2) return;
+        const tint=(ci+k)%4, n=ch.length/2, step=n>40?2:1, jx=(r()-.5)*(pass?1.6:0), jy=(r()-.5)*(pass?1.6:0), ds=pass?0.025:0, chainS=(r()-.5)*0.08;
+        let have=false;
+        for(let p=0;p<n;p+=step){ const x=ch[p*2], y=ch[p*2+1], wob=Math.sin(p*.35+ci)*0.2;
+          const X=(x/W-.5)*a, Y=.5-y/H, s=depth(X,Y)+chainS+ds;
+          put(x+jx+wob,y+jy+wob,s,B3); colour(x,y,tint,CB);
+          if(have){ pos.push(A3[0],A3[1],A3[2],B3[0],B3[1],B3[2]); col.push(CA[0],CA[1],CA[2],CB[0],CB[1],CB[2]); }
+          A3[0]=B3[0];A3[1]=B3[1];A3[2]=B3[2]; CA[0]=CB[0];CA[1]=CB[1];CA[2]=CB[2]; have=true; }
+      });
+    }
+    return {k,pos:new Float32Array(pos),col:new Float32Array(col),cd,CW,CH};
+  }
+
+  let worker=null;
+  try{ worker=new Worker(URL.createObjectURL(new Blob([`const traceJob=${traceJob.toString()};
+    onmessage=e=>{ const r=traceJob(e.data); postMessage(r,[r.pos.buffer,r.col.buffer,r.cd.buffer]); };`],{type:'text/javascript'})));
+    worker.onmessage=e=>finish(e.data);
+    worker.onerror=()=>{ worker=null; ALL.forEach(g=>{ if(g.state==='loading') g.state=null; }); dirty=true; };
+  }catch(e){ worker=null; }
+
+  let dirty=true;
+  const queue=[]; let busy=0;
+  function build(g){ if(g.state) return; g.state='queued'; queue.push(g); }
+  function pump(){
+    // start at most one new slide per frame, and not while the camera is mid-move unless nothing nearby is ready
+    if(!queue.length||busy>1) return;
+    queue.sort((p,q)=>Math.abs(p.beat-u)-Math.abs(q.beat-u));
+    const g=queue.shift(); if(g.state!=='queued') return;
+    g.state='loading'; busy++;
+    const go_=(img)=>{ if(g.state!=='loading'){ busy--; return; }
+      const W=g.a>=1?640:Math.round(720*g.a), H=Math.round(W/g.a), CW=g.a>=1?1400:Math.round(1500*g.a), CH=Math.round(CW/g.a);
+      const sc=document.createElement('canvas'); sc.width=W; sc.height=H; const sx=sc.getContext('2d',{willReadFrequently:true}); sx.drawImage(img,0,0,W,H);
+      const cc=document.createElement('canvas'); cc.width=CW; cc.height=CH; const cx=cc.getContext('2d',{willReadFrequently:true}); cx.drawImage(img,0,0,CW,CH);
+      let px,cd; try{ px=sx.getImageData(0,0,W,H).data; cd=cx.getImageData(0,0,CW,CH).data; }catch(e){ g.state='error'; busy--; return; }
+      g._img=img;
+      const job={k:g.k,W,H,px,CW,CH,cd,a:g.a,P:g.P.toArray(),C:g.C.toArray(),R:g.right.toArray(),U:g.up.toArray()};
+      if(worker) worker.postMessage(job,[px.buffer,cd.buffer]);
+      else setTimeout(()=>finish(traceJob(job)),0);
+    };
+    if(g.story){ (document.fonts&&document.fonts.load?document.fonts.load('700 52px Caveat').catch(()=>{}):Promise.resolve()).then(()=>go_(drawStory(g))); return; }
+    const img=new Image(); img.decoding='async'; img.src=`img/${g.id}.jpg`;
+    img.onload=()=>{ (img.decode?img.decode().catch(()=>{}):Promise.resolve()).then(()=>go_(img)); };
+    img.onerror=()=>{ g.state='error'; busy--; };
+  }
+  function finish(res){
+    busy=Math.max(0,busy-1);
+    const g=ALL[res.k]; if(!g||g.state!=='loading') return;
+    const cc=document.createElement('canvas'); cc.width=res.CW; cc.height=res.CH; cc.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(res.cd.buffer),res.CW,res.CH),0,0);
+    const mk=(map)=>{ const m=new THREE.Mesh(new THREE.PlaneGeometry(g.a,1),new THREE.MeshBasicMaterial({map,transparent:true,opacity:0,depthWrite:false,depthTest:false}));
+      m.position.copy(g.P); m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(g.right,g.up,g.C.clone().sub(g.P).normalize())); scene.add(m); return m; };
+    const tx=(t)=>{ t.encoding=THREE.sRGBEncoding; t.minFilter=THREE.LinearFilter; t.generateMipmaps=false; t.anisotropy=renderer.capabilities.getMaxAnisotropy(); t.needsUpdate=true; return t; };
+    let fullTex; if(g.story){ g.acv=document.createElement('canvas'); g.acv.width=CW_; g.acv.height=CH_; g.actx=g.acv.getContext('2d'); drawCartoon(g,g.actx,0,false); fullTex=new THREE.CanvasTexture(g.acv); } else fullTex=new THREE.Texture(g._img);
+    const cut=mk(tx(new THREE.CanvasTexture(cc))), full=mk(tx(fullTex));
+    const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.BufferAttribute(res.pos,3)); geo.setAttribute('acol',new THREE.BufferAttribute(res.col,3));
+    const lines=new THREE.LineSegments(geo,new THREE.ShaderMaterial({uniforms:{uO:{value:0},uR:{value:new THREE.Vector4(0,0,0,0)},uM:{value:0}},
+      vertexShader:lineVS,fragmentShader:lineFS,transparent:true,depthWrite:false,depthTest:false}));
+    lines.frustumCulled=false; scene.add(lines);
+    // upload textures now, off the critical path of the next transition frame
+    renderer.initTexture&&(renderer.initTexture(cut.material.map),renderer.initTexture(full.material.map));
+    g.cut=cut; g.full=full; g.lines=lines; g.nv=res.pos.length/3; g._img=null; g.state='ready'; dirty=true;
+    if(g.k===0) $('loading').style.opacity=0;
+  }
+  function dispose(g){ if(g.state!=='ready'){ g.state=null; return; }
+    for(const m of [g.full,g.cut]){ scene.remove(m); m.geometry.dispose(); m.material.map.dispose(); m.material.dispose(); }
+    scene.remove(g.lines); g.lines.geometry.dispose(); g.lines.material.dispose(); g.cut=g.full=g.lines=null; g.state=null; }
+
+  /* ---------- filmstrip ---------- */
+  const strip=$('strip'), ticks=[];
+  chapters.forEach(c=>{ const gEl=document.createElement('div'); gEl.className='grp'; gEl.innerHTML=`<small>${c.label}</small><div class="ticks"></div>`;
+    const t=gEl.querySelector('.ticks');
+    for(let beat=c.start;beat<=c.end;beat++){ const B=beats[beat], btn=document.createElement('button'); btn.type='button';
+      if(B.type==='card') btn.className='card-tick'; if(B.type==='story') btn.className='story-tick';
+      const lab=B.type==='card'?`${c.label} overview`:B.type==='slide'?`${c.label}: ${G[B.g].cap}`:`Why it matters: ${STORIES[B.st.id].title}`;
+      btn.setAttribute('aria-label',lab); btn.title=lab; btn.onclick=()=>go(beat); t.appendChild(btn); ticks[beat]=btn; }
+    strip.appendChild(gEl); c.grp=gEl; });
+
+  /* ---------- render ---------- */
+  let u=0, lastBeat=-1, tnow=0;
+  const tmpP=new THREE.Vector3(), tmpT=new THREE.Vector3(), ctrl=new THREE.Vector3(), tmpV=new THREE.Vector3(), dbs=new THREE.Vector2(), rect=new THREE.Vector4();
+  // a journey between two poses: swing wide and rise or dip, bank into the turn, look ahead along the path,
+  // then come around and glide straight in onto the next slide
+  const c1=new THREE.Vector3(), c2=new THREE.Vector3(), q0=new THREE.Vector3(), q1=new THREE.Vector3(), la=new THREE.Vector3(), lt=new THREE.Vector3(), fwd=new THREE.Vector3();
+  function bez(a,b,c,d,t,out){ const it=1-t; return out.set(0,0,0).addScaledVector(a,it*it*it).addScaledVector(b,3*it*it*t).addScaledVector(c,3*it*t*t).addScaledVector(d,t*t*t); }
+  function cameraAt(u){
+    const i=clamp(Math.floor(u),0,LAST), j=Math.min(i+1,LAST), t=u-i, a=poses[i], b=poses[j];
+    let roll=0;
+    if(i===j||t<1e-4){ tmpP.copy(a.pos); tmpT.copy(a.tgt); camera.fov=a.fov; }
+    else{
+      const k=i, side=(a.g?a.g.side:(k%2?1:-1)), vs=(k%3===1?-1:1);
+      const R_=a.g?a.g.right:tmpV.set(1,0,0), U_=a.g?a.g.up:UP, nb=b.g?b.g.n:fwd.copy(b.pos).sub(b.tgt).normalize();
+      const span=a.pos.distanceTo(b.pos), w=clamp(span*0.9,0.9,2.2);
+      c1.copy(a.pos).addScaledVector(R_,side*1.25*w).addScaledVector(U_,vs*0.55*w).lerp(b.pos,0.2);
+      c2.copy(b.pos).addScaledVector(nb,0.9*w).addScaledVector(R_,-side*0.35*w).addScaledVector(U_,-vs*0.2*w);
+      bez(a.pos,c1,c2,b.pos,t,tmpP);
+      // look ahead along the path mid-journey, settle on the slides at either end
+      bez(a.pos,c1,c2,b.pos,Math.min(1,t+0.1),q1); la.copy(q1).sub(tmpP); if(la.lengthSq()<1e-8) la.copy(b.tgt).sub(tmpP);
+      la.normalize(); lt.copy(tmpP).addScaledVector(la,1.6);
+      const st=smooth(0.15,0.95,t); tmpT.copy(a.tgt).lerp(b.tgt,st);
+      const look=Math.sin(Math.PI*t)*((a.g&&a.g.story)||(b.g&&b.g.story)?0.25:0.7); tmpT.lerp(lt,look);
+      camera.fov=a.fov+(b.fov-a.fov)*st+12*Math.sin(Math.PI*t);
+      roll=-side*0.32*Math.sin(Math.PI*t)*(1-0.4*t);
+    }
+    // gentle drift while resting on a card, so the depth reads
+    const B=beats[Math.round(u)], rest=B.type==='card'?(1-clamp(Math.abs(u-Math.round(u))*4,0,1)):0;
+    if(rest>0){ tmpP.x+=Math.sin(tnow*.00035)*0.18*rest; tmpP.y+=Math.cos(tnow*.00028)*0.08*rest; }
+    camera.position.copy(tmpP); camera.up.copy(UP); camera.lookAt(tmpT); if(roll) camera.rotateZ(roll); camera.updateProjectionMatrix();
+  }
+  function render(){
+    const beat=Math.round(u), B=beats[beat];
+    // which slides to keep built
+    const gNear=B.type==='slide'?B.g:B.type==='story'?B.st.fromK:(()=>{const c=chapters[B.ci]; if(c.P) return c.slides[0].k; let k=0; for(const s of G){ if(s.beat<beat) k=s.k; } return k;})();
+    ALL.forEach(g=>{ const dk=(g.story?g.fromK:g.k)-gNear; if(dk>=-3&&dk<=4) build(g); else if((dk<-6||dk>7)&&g.state) dispose(g); });
+    cameraAt(u);
+    // drawings stay in the scene: the one you left holds around you, the next one draws itself in as you approach
+    const off=Math.abs(u-beat), moving=smooth(0.0,0.22,off), restCard=B.type==='card';
+    const ready=ALL.filter(g=>g.state==='ready');
+    ready.forEach(g=>g._dc=camera.position.distanceToSquared(g.P));
+    ready.sort((a,b)=>b._dc-a._dc).forEach((g,i)=>{ g.lines.renderOrder=i*2; g.cut.renderOrder=i*2+1; g.full.renderOrder=1000; });
+    // screen rectangle of the slide we are settling on; other drawings are masked out of it so it reads cleanly
+    let mask=0; const cur=B.type==='slide'?G[B.g]:B.type==='story'?B.st:null;
+    if(cur){ mask=1-smooth(0.04,0.3,off);
+      renderer.getDrawingBufferSize(dbs); let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+      for(const [sx,sy] of [[-1,-1],[1,-1],[1,1],[-1,1]]){ tmpV.copy(cur.P).addScaledVector(cur.right,sx*cur.a/2).addScaledVector(cur.up,sy*.5).project(camera);
+        const X=(tmpV.x*.5+.5)*dbs.x, Y=(tmpV.y*.5+.5)*dbs.y; x0=Math.min(x0,X); x1=Math.max(x1,X); y0=Math.min(y0,Y); y1=Math.max(y1,Y); }
+      rect.set(x0,y0,x1,y1); }
+    ready.forEach(g=>{
+      const d=Math.abs(u-g.beat), ahead=u<g.beat, fade=1-smooth(2.6,5,d), near=d<0.5;
+      g.full.material.opacity=1-smooth(0.015,0.16,d);
+      g.cut.material.opacity=(near ? (ahead?1-smooth(0.02,0.5,d):1-0.85*smooth(0.02,0.5,d)) : 0.15*(restCard?1:moving)*fade)*(g.story?smooth(0.03,0.2,d):1);
+      const U_=g.lines.material.uniforms;
+      U_.uO.value=(near?0.95*smooth(0.02,0.18,d):(restCard?0.5:(ahead?0.35:0.8)+0.15*moving))*fade;
+      if(g===cur){ U_.uM.value=0; } else { U_.uM.value=mask; U_.uR.value.copy(rect); }
+      const prog=ahead?smooth(0,1,1-(g.beat-u)/1.7):1;
+      g.lines.geometry.setDrawRange(0,Math.floor(g.nv*prog/2)*2);
+      // cartoon plays while it is on screen, from the start each time you arrive
+      if(g.story){ if(g.full.material.opacity>0.003){ if(!g.playing){ g.playing=true; g.t0=tnow; }
+          if(tnow-(g.lastDraw||0)>30){ drawCartoon(g,g.actx,(tnow-g.t0)/1000,false); g.full.material.map.needsUpdate=true; g.lastDraw=tnow; } } else g.playing=false; } });
+    // cards
+    chapters.forEach((c,ci)=>{ const L=u-c.start, first=ci===0, last=ci===chapters.length-1;
+      let op=0, tf='none', blur=0;
+      if(L>=-1&&L<0&&!first){ const e=L+1; tf=`translateZ(${-2600*Math.pow(1-e,1.6)}px)`; op=smooth(0.2,0.8,e); blur=(1-e)*7; }
+      else if(L>=0&&L<=1){ if(c.P){ tf=`translateY(${-0.28*vh*L}px) rotateX(${90*L}deg)`; op=L<0.985?1:0; }
+        else if(!last){ tf=`translateZ(${1300*L*L}px)`; op=1-smooth(0.35,0.9,L); blur=L*6; } else op=1; }
+      else if(L>1&&last) op=1;
+      c.cardEl.style.opacity=op; c.cardEl.style.transform=tf; c.cardEl.style.filter=blur>0.05?`blur(${blur.toFixed(2)}px)`:'none';
+      c.cardEl.style.visibility=op>0.001?'visible':'hidden'; c.cardEl.classList.toggle('live',Math.abs(L)<0.15);
+      if(c.edge){ c.edge.style.opacity=clamp(1-Math.abs(L-0.55)*4,0,1); c.edge.style.transform=`translateY(${-0.28*vh}px)`; }
+    });
+    // caption + filmstrip
+    const cap=$('cap');
+    if(B.type==='slide'){ const g=G[B.g], c=chapters[g.ci]; $('capch').textContent=c.label; $('captx').textContent=g.cap; $('capn').textContent=`${g.j+1}/${c.P}`;
+      cap.style.opacity=1-smooth(0.08,0.3,Math.abs(u-beat)); stage.classList.toggle('zoomable',Math.abs(u-beat)<0.05); }
+    else if(B.type==='story'){ $('capch').textContent=chapters[B.ci].label; $('captx').textContent='Why it matters: '+STORIES[B.st.id].title.toLowerCase(); $('capn').textContent='';
+      cap.style.opacity=1-smooth(0.08,0.3,Math.abs(u-beat)); stage.classList.remove('zoomable'); }
+    else { cap.style.opacity=0; stage.classList.remove('zoomable'); }
+    if(beat!==lastBeat){ const active=B.ci;
+      ticks.forEach((t,i)=>t.classList.toggle('on',i===beat));
+      chapters.forEach((c,i)=>c.grp.classList.toggle('on',i===active));
+      lastBeat=beat; const t=ticks[beat], sr=strip.getBoundingClientRect(), r=t.getBoundingClientRect();
+      if(r.left<sr.left+20||r.right>sr.right-20) strip.scrollBy({left:r.left-sr.left-sr.width/2,behavior:'smooth'}); }
+    renderer.render(scene,camera);
+  }
+  // one loop: advance the transition and draw in the same frame, at the display's own refresh rate (120 Hz screens get 120 fps)
+  function loop(now){ tnow=now; tick(now); pump(); const B=beats[Math.round(u)];
+    if(anim||dirty||((B.type==='card'||B.type==='story')&&!document.body.classList.contains('map'))){ dirty=false; render(); }
+    requestAnimationFrame(loop); }
+
+  function layout(){ vw=innerWidth; vh=innerHeight; renderer.setSize(vw,vh,false); camera.aspect=vw/vh;
+    camera.setViewOffset(vw,vh,0,28,vw,vh); computePoses(); dirty=true; }
+
+  /* ---------- automated transitions ---------- */
+  // continuous motion: input moves the target; the camera follows with eased velocity, so queued moves flow into each other without stopping
+  let target=0, anim=null, vel=0, lastF=0, hintGone=false, mapBusy=false;
+  function go(t){ target=clamp(Math.round(t),0,LAST); anim=anim||true; if(!hintGone){hintGone=true;$('hint').style.opacity=0;} }
+  function tick(now){ const dt=Math.min(0.05,Math.max(0,(now-(lastF||now))/1000)); lastF=now;
+    if(!anim) return;
+    const dist=target-u, ad=Math.abs(dist);
+    if(ad<0.0005&&Math.abs(vel)<0.03){ u=target; vel=0; anim=null; dirty=true; return; }
+    const vmax=ad<=1.5?0.74:clamp(0.74+(ad-1.5)*1.2,0.74,15), acc=Math.max(1.05,vmax*1.4);
+    const want=Math.sign(dist)*Math.min(vmax,Math.sqrt(2*acc*ad*0.92));
+    vel+=clamp(want-vel,-acc*dt,acc*dt); u+=vel*dt;
+    if((target-u)*dist<0){ u=target; vel=0; } }
+  const inMap=()=>document.body.classList.contains('map');
+  function step(d){ if(inMap()){ if(d>0) leaveMap(target); return; } if(d<0&&target===0&&u<0.02){ openMap(); return; }
+    if(Math.abs(target+d-u)>4) return; go(target+d); }
+
+  /* ---------- input ---------- */
+  const lb=$('lb'); const closeLB=()=>lb.classList.remove('open');
+  // every wheel notch (or equivalent trackpad travel) queues one move
+  let wAcc=0,wLast=0;
+  addEventListener('wheel',e=>{ e.preventDefault(); if(lb.classList.contains('open')){closeLB();return;}
+    if(mapBusy) return;
+    const now=performance.now(), vert=Math.abs(e.deltaY)>=Math.abs(e.deltaX); let dlt=vert?e.deltaY:e.deltaX;
+    if(e.deltaMode===1) dlt*=33; else if(e.deltaMode===2) dlt*=vh;
+    if(now-wLast>220||Math.sign(dlt)!==Math.sign(wAcc)) wAcc=0; wLast=now;
+    wAcc+=dlt; const thr=Math.abs(dlt)>=50?90:240;
+    while(Math.abs(wAcc)>=thr){ const d=Math.sign(wAcc); wAcc-=d*thr; step(d); } },{passive:false});
+  let ty0=null;
+  addEventListener('touchstart',e=>{ty0=e.touches[0].clientY},{passive:true});
+  addEventListener('touchmove',e=>{ if(!e.target.closest('.strip')) e.preventDefault(); },{passive:false});
+  addEventListener('touchend',e=>{ if(ty0==null) return; const dy=ty0-e.changedTouches[0].clientY; ty0=null; if(Math.abs(dy)>40&&!mapBusy) step(Math.sign(dy)); });
+  addEventListener('keydown',e=>{ const k=e.key;
+    if(jumpMenu&&jumpMenu.classList.contains('open')){ const items=[...jumpMenu.children], i=items.indexOf(document.activeElement);
+      if(k==='Escape'){ e.preventDefault(); closeJump(); jumpBtn.focus(); return; }
+      if(k==='ArrowDown'||k==='ArrowUp'){ e.preventDefault(); items[(i+(k==='ArrowDown'?1:-1)+items.length)%items.length].focus(); return; }
+      if(k==='Enter'||k===' ') return; }
+    if(lb.classList.contains('open')){ if(k==='Escape'||k===' '){e.preventDefault();closeLB();} return; }
+    if(e.target.closest&&e.target.closest('.leaf')&&(k==='Enter'||k===' ')) return;
+    if(['ArrowDown','ArrowRight','PageDown',' '].includes(k)){e.preventDefault();step(1);}
+    else if(['ArrowUp','ArrowLeft','PageUp'].includes(k)){e.preventDefault();step(-1);}
+    else if(k==='Home'){e.preventDefault();go(0);} else if(k==='End'){e.preventDefault();go(LAST);}
+    else if(k==='m'||k==='M'||k==='Escape'){ inMap()?leaveMap(target):openMap(); } });
+  lb.addEventListener('click',closeLB);
+  renderer.domElement.addEventListener('click',()=>{ const B=beats[Math.round(u)]; if(B.type!=='slide'||Math.abs(u-Math.round(u))>0.05) return;
+    const g=G[B.g]; $('lbimg').src=`img/${g.id}.jpg`; $('lbimg').alt=g.cap; $('lbcap').textContent=g.cap; lb.classList.add('open'); });
+
+  /* ======================= TREE MAP ======================= */
+  const svg=$('treesvg'), NS='http://www.w3.org/2000/svg', tree=$('tree');
+  const mk=(tag,attrs,parent=svg)=>{const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); parent.appendChild(e); return e;};
+  const tr=rng(42);
+  function sketch(pts,width,color,delay,passes=3){
+    for(let p=0;p<passes;p++){
+      let d=`M${pts[0][0]+(tr()-.5)*3},${pts[0][1]+(tr()-.5)*3}`;
+      for(let i=1;i<pts.length;i+=2){ const c=pts[i], e=pts[i+1]||pts[i]; d+=` Q${c[0]+(tr()-.5)*6},${c[1]+(tr()-.5)*6} ${e[0]+(tr()-.5)*3},${e[1]+(tr()-.5)*3}`; }
+      const path=mk('path',{d,class:'ink grow',stroke:color,'stroke-width':Math.max(.8,width*(1-p*.3)),'stroke-opacity':p?0.35:0.8,pathLength:1});
+      path.style.transitionDelay=(delay+p*0.08)+'s'; }
+  }
+  for(let k=-3;k<=3;k++) sketch([[500+k*4,665],[500+k*3,560],[500+k*2.2,470]],3,'#c9b8a0',0,1);
+  const roots=[
+    {to:[150,880],c:[330,700],t:['M.S. Human Systems','Engineering · ASU 2026'],anchor:'start'},
+    {to:[310,945],c:[430,760],t:['B.S. HSE · ASU 2025','Summa cum laude'],anchor:'middle'},
+    {to:[500,965],c:[505,820],t:['B.S. Integrative Studies','Applied Statistics minor · KSU'],anchor:'middle'},
+    {to:[690,945],c:[570,760],t:['Task analysis','Stakeholder interviews'],anchor:'middle'},
+    {to:[850,880],c:[670,700],t:['Human-automation','interaction · Data in R'],anchor:'end'}];
+  roots.forEach((r,i)=>{ sketch([[500,650],r.c,r.to],2.4,'#7d8aa8',0.2+i*0.08,3);
+    for(let h=0;h<3;h++){ const s=[(500+r.c[0])/2+(tr()-.5)*30,(650+r.c[1])/2+(tr()-.5)*20]; sketch([s,[s[0]+(tr()-.5)*70,s[1]+30+tr()*30],[s[0]+(tr()-.5)*90,s[1]+60+tr()*40]],0.8,'#7d8aa8',0.6+h*.1,1); }
+    const tx=mk('text',{x:r.to[0],y:r.to[1]+20,'text-anchor':r.anchor,class:'rlabel'}); tx.innerHTML=`<tspan class="b">${r.t[0]}</tspan><tspan x="${r.to[0]}" dy="14">${r.t[1]}</tspan>`; });
+  sketch([[60,660],[500,652],[940,662]],1,'#3a4560',0,2);
+  const nameT=mk('text',{x:518,y:600,class:'tlabel main'}); nameT.textContent='Tanner Pack'; nameT.onclick=()=>leaveMap(0);
+  const nameS=mk('text',{x:518,y:618,class:'rlabel'}); nameS.textContent='Human systems engineer';
+  const BR={
+    uas1:{from:[500,520],via:[380,470],tip:[180,420],col:'#ffb547',lx:180,ly:505},
+    uas2:{from:[495,500],via:[400,380],tip:[305,255],col:'#ffb547',lx:305,ly:305},
+    uas3:{from:[497,480],via:[430,330],tip:[420,115],col:'#ffb547',lx:420,ly:225},
+    uas4:{from:[500,505],via:[300,470],tip:[95,265],col:'#ffb547',lx:95,ly:335},
+    hw:  {from:[503,480],via:[600,330],tip:[700,200],col:'#67d1c1',lx:700,ly:290},
+    fat: {from:[505,515],via:[700,470],tip:[860,405],col:'#9aa8ff',lx:860,ly:465},
+    seat:{from:[502,470],via:[540,330],tip:[575,175],col:'#e9edf5',lx:575,ly:112}};
+  const leafG=mk('g',{}), tip=$('tip');
+  const moveTip=e=>{tip.style.left=Math.min(e.clientX+14,innerWidth-270)+'px';tip.style.top=(e.clientY+16)+'px';};
+  const showTip=(e,t)=>{tip.textContent=t;tip.style.opacity=1;moveTip(e);};
+  const hideTip=()=>{tip.style.opacity=0;};
+  chapters.forEach((c,ci)=>{ const b=BR[c.key]; if(!b) return;
+    sketch([b.from,b.via,b.tip],2.2,b.col,0.5+ci*0.07,3);
+    for(let t=0;t<2;t++){ const m=[(b.via[0]+b.tip[0])/2+(tr()-.5)*20,(b.via[1]+b.tip[1])/2+(tr()-.5)*20]; sketch([m,[m[0]+(tr()-.5)*60,m[1]-20-tr()*30],[m[0]+(tr()-.5)*80,m[1]-40-tr()*30]],0.9,b.col,1.1,1); }
+    if(!c.P) mk('circle',{cx:b.tip[0],cy:b.tip[1],r:6,class:'leaf',style:`fill:${b.col};opacity:.6`});
+    const lab=mk('text',{x:b.lx,y:b.ly,'text-anchor':'middle',class:'tlabel'}); lab.textContent=c.label; lab.onclick=()=>leaveMap(c.start);
+    c.slides.forEach((s,j)=>{ const ang=j*2.39996, rad=c.P>10?9*Math.sqrt(j+1)+6:13*Math.sqrt(j+1)+4;
+      const cx=b.tip[0]+Math.cos(ang)*rad*1.25, cy=b.tip[1]+Math.sin(ang)*rad, w=s.a>1.2?30:20, h=w/s.a;
+      const gEl=mk('g',{class:'leaf',tabindex:0,role:'button','aria-label':`${c.label}: ${s.cap}`},leafG);
+      gEl.style.transitionDelay=(1.0+ci*0.12+j*0.025)+'s';
+      mk('image',{href:`th/${s.id}.jpg`,x:cx-w/2,y:cy-h/2,width:w,height:h,preserveAspectRatio:'xMidYMid slice'},gEl);
+      mk('rect',{x:cx-w/2,y:cy-h/2,width:w,height:h,rx:1},gEl);
+      gEl.addEventListener('click',()=>leaveMap(s.beat,gEl));
+      gEl.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();leaveMap(s.beat,gEl);}});
+      gEl.addEventListener('mouseenter',e=>{leafG.appendChild(gEl);showTip(e,`${c.label} · ${s.cap}`)}); gEl.addEventListener('mousemove',moveTip); gEl.addEventListener('mouseleave',hideTip);
+    }); });
+  const ct=mk('text',{x:500,y:700,'text-anchor':'middle',class:'tlabel'}); ct.textContent='Contact'; ct.onclick=()=>leaveMap(LAST);
+
+  openMap=function(){ if(mapBusy) return; mapBusy=true; hideTip(); closeLB(); anim=null; vel=0; u=target; dirty=true;
+    tree.classList.remove('leaving'); tree.style.transformOrigin='50% 50%';
+    document.body.classList.add('map'); $('maplabel').textContent='Tour'; setTimeout(()=>mapBusy=false,900); };
+  function leaveMap(beat,from){ if(mapBusy) return; mapBusy=true; hideTip();
+    if(from){ const r=from.getBoundingClientRect(); tree.style.transformOrigin=`${r.left+r.width/2}px ${r.top+r.height/2}px`; } else tree.style.transformOrigin='50% 50%';
+    tree.classList.add('leaving'); anim=null; vel=0; target=clamp(beat,0,LAST); u=target; dirty=true;
+    setTimeout(()=>{ document.body.classList.remove('map'); $('maplabel').textContent='Map'; },350);
+    setTimeout(()=>{ tree.classList.remove('leaving'); mapBusy=false; },1300);
+    if(!hintGone){hintGone=true;$('hint').style.opacity=0;} }
+
+  /* ---------- project jump menu ---------- */
+  const jumpBtn=$('jump'), jumpMenu=$('jumpmenu');
+  chapters.forEach((c,i)=>{ const b=document.createElement('button'); b.type='button'; b.setAttribute('role','menuitem');
+    const n=c.end-c.start; b.innerHTML=`<span class="n">${String(i+1).padStart(2,'0')}</span><span>${c.label}</span><span class="c">${n?n+' stops':''}</span>`;
+    b.onclick=()=>{ closeJump(); jumpTo(c.start); }; jumpMenu.appendChild(b); c.jumpEl=b; });
+  const stripBox=document.createElement('div'); stripBox.className='stripbox'; strip.parentNode.insertBefore(stripBox,strip);
+  stripBox.append(jumpBtn,strip);   // button in its own column at the top-left of the timeline box; only the timeline scrolls
+  function placeJump(){ const sr=stripBox.getBoundingClientRect(), r=jumpBtn.getBoundingClientRect(), mw=jumpMenu.offsetWidth||320;
+    jumpMenu.style.left=Math.max(16,Math.min(r.left,innerWidth-mw-16))+'px'; jumpMenu.style.bottom=(innerHeight-sr.top+8)+'px'; }
+  function openJump(){ placeJump(); const ci=beats[Math.round(u)].ci; chapters.forEach((c,i)=>c.jumpEl.classList.toggle('on',i===ci));
+    jumpMenu.classList.add('open'); jumpBtn.setAttribute('aria-expanded','true'); chapters[ci].jumpEl.focus(); }
+  function closeJump(){ jumpMenu.classList.remove('open'); jumpBtn.setAttribute('aria-expanded','false'); }
+  jumpBtn.addEventListener('click',e=>{ e.stopPropagation(); jumpMenu.classList.contains('open')?closeJump():openJump(); });
+  document.addEventListener('click',e=>{ if(!e.target.closest('#jumpmenu,#jump')) closeJump(); });
+  // nearby projects fly there; far ones cut with a quick fade instead of a long flight
+  function jumpTo(b){ if(Math.abs(b-u)<=3){ go(b); return; }
+    stage.classList.add('blink'); stage.style.opacity=0;
+    setTimeout(()=>{ anim=null; vel=0; target=b; u=b; dirty=true; stage.style.opacity=1; setTimeout(()=>stage.classList.remove('blink'),260); },230);
+    if(!hintGone){hintGone=true;$('hint').style.opacity=0;} }
+  addEventListener('resize',placeJump); requestAnimationFrame(placeJump);
+  $('mapbtn').addEventListener('click',()=>inMap()?leaveMap(target):openMap());
+  $('enter').addEventListener('click',()=>leaveMap(0));
+
+  addEventListener('resize',layout);
+  // deep links: yoursite/#honeywell opens straight to that project (for separate LinkedIn project entries)
+  const LINKS={about:'about',uas:'uas1',drone:'uas1',interfaces:'uas2',warnings:'uas3',alerts:'uas3',automation:'uas4',honeywell:'hw',fatigue:'fat',seats:'seat',seat:'seat',contact:'contact'};
+  function fromHash(){ const h=(location.hash||'').slice(1).toLowerCase(), key=LINKS[h]; if(!key) return false;
+    const c=chapters.find(x=>x.key===key); if(!c) return false; anim=null; vel=0; target=c.start; u=c.start; dirty=true;
+    if(!hintGone){hintGone=true;$('hint').style.opacity=0;} return true; }
+  addEventListener('hashchange',()=>{ if(!fromHash()) return; });
+  fromHash();
+  window.__tour={set:v=>{anim=null;vel=0;u=v;target=v;dirty=true},stories:()=>beats.map((b,i)=>b.type==="story"?i:-1).filter(i=>i>=0)};
+  layout(); requestAnimationFrame(loop);
+})();
+</script>
+
+</body>
+</html>
