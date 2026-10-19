@@ -215,10 +215,28 @@ body.flat .cmenu .cgo{display:none}
 .tip{position:fixed;z-index:40;pointer-events:none;font-size:12.5px;background:var(--plate);border:1px solid var(--hair);padding:6px 10px;border-radius:4px;max-width:260px;opacity:0;transition:opacity .15s}
 
 /* lightbox */
-.lb{position:fixed;inset:0;z-index:50;background:rgba(6,9,16,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;opacity:0;pointer-events:none;transition:opacity .3s}
-.lb.open{opacity:1;pointer-events:auto;cursor:zoom-out}
-.lb img{max-width:min(1400px,96vw);max-height:84vh;object-fit:contain;border-radius:4px;background:#fff}
-.lb p{margin:0;font-size:14px;color:var(--muted)}
+.lb{position:fixed;inset:0;z-index:60;background:#060910;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .25s;touch-action:none}
+.lb.open{opacity:1;pointer-events:auto}
+.lbstage{position:relative;flex:1;min-height:0;overflow:hidden;cursor:zoom-in}
+.lbstage.zoomed{cursor:grab}.lbstage.dragging{cursor:grabbing}
+.lbstage img{position:absolute;left:50%;top:50%;transform-origin:center;border-radius:3px;background:#fff;user-select:none;-webkit-user-drag:none;will-change:transform}
+.lbbar{flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--hair);background:rgba(11,16,28,.9)}
+.lbbar p{margin:0;font-size:14px;color:var(--text);min-width:0;flex:1 1 220px}
+.lbbar p small{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted);margin-top:2px}
+.lbtools{display:flex;gap:6px;flex:none;flex-wrap:wrap}
+.lbtools button:disabled{opacity:.3;pointer-events:none}
+.lbstage img.fadein{animation:lbin .28s ease}
+@keyframes lbin{from{opacity:0}to{opacity:1}}
+.lbtools button{all:unset;cursor:pointer;min-width:40px;height:40px;padding:0 12px;box-sizing:border-box;display:grid;place-items:center;border-radius:6px;border:1px solid var(--hair);font-family:var(--f-mono);font-size:13px;color:var(--text)}
+.lbtools button:hover{border-color:var(--amber);color:var(--amber)}
+.lbtools button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.lbtools #lbclose{background:var(--amber);color:#1a1205;border-color:var(--amber);font-weight:500}
+.lbtop{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;color:var(--muted);background:rgba(11,16,28,.8);padding:6px 10px;border-radius:20px;pointer-events:none;transition:opacity .4s;white-space:nowrap}
+.zoombtn{all:unset;pointer-events:auto;cursor:pointer;display:none;align-items:center;gap:6px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#1a1205;background:var(--amber);padding:5px 10px;border-radius:4px;flex:none;text-shadow:none;align-self:center}
+.zoombtn svg{width:12px;height:12px}
+.cap.canzoom .zoombtn{display:inline-flex}
+.zoombtn:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.static figure img{cursor:zoom-in}
 
 /* reduced motion or no WebGL: a plain scrolling page */
 .static{display:none}
@@ -261,7 +279,7 @@ body.flat .static{display:flex;flex-direction:column;gap:48px;align-items:center
 <nav class="strip" id="strip" aria-label="Timeline"></nav>
 <button class="jump" id="jump" type="button" aria-label="Jump to a project" aria-haspopup="true" aria-expanded="false" title="Jump to a project"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h10M3 8h10M3 12h10"/></svg></button>
 <div class="jumpmenu" id="jumpmenu" role="menu" aria-label="Projects"></div>
-<div class="cap" id="cap" style="opacity:0"><span id="capch"></span><b id="captx"></b><em id="capn"></em></div>
+<div class="cap" id="cap" style="opacity:0"><span id="capch"></span><b id="captx"></b><em id="capn"></em><button class="zoombtn" id="zoombtn" type="button" aria-label="Zoom into this slide"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14M7 5v4M5 7h4"/></svg>Zoom</button></div>
 <div class="hint" id="hint">Scroll, swipe or press ↓</div>
 
 <main class="stage" id="stage"><div class="loading" id="loading">Drawing…</div><div class="cards" id="cards"></div></main>
@@ -277,12 +295,15 @@ body.flat .static{display:flex;flex-direction:column;gap:48px;align-items:center
     <button class="cgo" type="button" data-gocontact>Go to the contact page</button></div></aside>
 </section>
 <div class="tip" id="tip"></div>
-<div class="lb" id="lb" role="dialog" aria-label="Slide viewer"><img id="lbimg" alt=""><p id="lbcap"></p></div>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Slide viewer">
+  <div class="lbstage" id="lbstage"><img id="lbimg" alt="" draggable="false"><div class="lbtop" id="lbhint"></div></div>
+  <div class="lbbar"><p id="lbcap"></p><div class="lbtools"><button id="lbprev" type="button" aria-label="Previous slide">‹</button><button id="lbnext" type="button" aria-label="Next slide">›</button><button id="lbout" type="button" aria-label="Zoom out">−</button><button id="lbin" type="button" aria-label="Zoom in">+</button><button id="lbfit" type="button">Fit</button><button id="lbclose" type="button">Close</button></div></div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-const A={"p03_0":1.7874,"p03_1":1.7874,"p04_0":1.7814,"p04_1":1.7814,"p05_0":1.7778,"p06_0":1.7778,"p06_1":1.7778,"p07_0":1.7891,"p07_1":1.7891,"p08_0":1.7844,"p08_1":1.7844,"p09_0":1.7723,"p09_1":1.7783,"p10_0":1.8093,"p10_1":1.8093,"p11_0":1.7932,"p11_1":1.7905,"p12_0":1.7874,"p12_1":1.7874,"p13_0":1.7874,"p13_1":1.7874,"p14_0":1.7874,"p14_1":1.7874,"p15_0":1.7814,"p15_1":1.7814,"p16_0":1.7814,"p16_1":1.7814,"p17_0":1.7814,"p17_1":1.7814,"p18_0":1.7814,"p18_1":1.7814,"p19_0":1.7814,"p19_1":1.7814,"p20_0":1.7814,"p20_1":1.7814,"p21_0":1.7814,"p22_0":1.7814,"p22_1":1.7814,"p24_0":0.861,"p25_0":0.9647,"p26_0":0.9096,"p27_0":0.9039,"p28_0":0.8986,"p29_0":0.8233,"p30_0":0.9106,"p31_0":1.0074,"p33_0":0.9286,"p34_0":1.8249,"p35_0":0.9656,"s01":1.7778,"s02":1.7778,"s03":1.7778,"s04":1.7778,"s05":1.7778,"s06":1.7778,"s07":1.7778,"r01":1.7778,"r02":1.7778};
+const A={"p03_0":1.7874,"p03_1":1.7874,"p04_0":1.7814,"p04_1":1.7814,"p05_0":1.7778,"p06_0":1.7778,"p06_1":1.7778,"p07_0":1.7891,"p07_1":1.7891,"p08_0":1.7844,"p08_1":1.7844,"p09_0":1.7723,"p09_1":1.7783,"p10_0":1.8093,"p10_1":1.8093,"p11_0":1.7932,"p11_1":1.7905,"p12_0":1.7874,"p12_1":1.7874,"p13_0":1.7874,"p13_1":1.7874,"p14_0":1.7874,"p14_1":1.7874,"p15_0":1.7814,"p15_1":1.7814,"p16_0":1.7814,"p16_1":1.7814,"p17_0":1.7814,"p17_1":1.7814,"p18_0":1.7814,"p18_1":1.7814,"p19_0":1.7814,"p19_1":1.7814,"p20_0":1.7814,"p20_1":1.7814,"p21_0":1.7814,"p22_0":1.7814,"p22_1":1.7814,"p24_0":0.861,"p25_0":0.9647,"p26_0":0.9096,"p27_0":0.9039,"p28_0":0.8986,"p29_0":0.8233,"p30_0":0.9106,"p31_0":1.0074,"p33_0":0.9286,"p34_0":1.8249,"p35_0":0.9656,"s01":1.7778,"s02":1.7778,"s03":1.7778,"s04":1.7778,"s05":1.7778,"s06":1.6,"s07":1.7778,"r01":1.6,"r01a":1.7778,"r01b":1.7778,"r02":1.4545};
 const S=(id,cap)=>({id,cap,dark:+id.slice(1,3)<=22});
 
 const CHAPTERS=[
@@ -301,7 +322,7 @@ const CHAPTERS=[
    <h2>UAS command-and-control interface design</h2>
    <p class="small">A human-centered control station for an emergency medical supply drone (EMSAD), built by Team 5. The goal was better situational awareness and fewer decision errors during complex flights. The design started with a task analysis of operator workload to find key information needs and failure points, then organized every screen around how operators think rather than how the system is built.</p>
    <ul class="skills"><li>Cognitive task analysis</li><li>Workload assessment</li><li>Mode awareness</li><li>Alert prioritization</li><li>Workstation ergonomics</li></ul>`,
-  slides:[S('r01','My role: primary interface designer'),S('p03_0','EMSAD: emergency medical supply and assistance drone'),S('p03_1','Overview: what EMSAD is and why it is needed'),S('p04_0','UAV design and functionality'),S('p04_1','Anthropometric data for reach and controls'),S('p05_0','Pilot workspace'),S('p06_0','Navigator workspace'),S('p06_1','Payload operator workspace'),S('p07_0','Seated work and chair design'),S('p07_1','Ergonomic chair design')]},
+  slides:[S('r01a','My role: primary interface designer (1 of 2)'),S('r01b','My role: contributions, continued (2 of 2)'),S('p03_0','EMSAD: emergency medical supply and assistance drone'),S('p03_1','Overview: what EMSAD is and why it is needed'),S('p04_0','UAV design and functionality'),S('p04_1','Anthropometric data for reach and controls'),S('p05_0','Pilot workspace'),S('p06_0','Navigator workspace'),S('p06_1','Payload operator workspace'),S('p07_0','Seated work and chair design'),S('p07_1','Ergonomic chair design')]},
 
  {key:'uas2',label:'UAS · Interfaces',card:`
    <p class="eyebrow">Project 01 · Part 2 of 4</p>
@@ -687,7 +708,7 @@ const CHAPTERS=[
     chapters.forEach(c=>{ const s=document.createElement('section');
       s.innerHTML=`<div class="card">${c.card}</div>`+(c.P?`<div class="grid">${c.slides.map(x=>`<figure><img loading="lazy" src="img/${x.id}.jpg" alt="${x.cap}"><figcaption>${x.cap}</figcaption></figure>`).join('')}</div>`:'');
       st.appendChild(s); });
-    document.body.classList.add('flat'); var openMap=null; return;
+    document.body.classList.add('flat'); st.addEventListener('click',e=>{ const im=e.target.closest('figure img'); if(im&&window.__openViewer) window.__openViewer(im.getAttribute('src'),im.alt); }); var openMap=null; return;
   }
 
   /* ---------- cards over the scene ---------- */
@@ -729,7 +750,7 @@ const CHAPTERS=[
   function oblique(g,dist,ang,lift=0.25){ const dir=g.n.clone().applyAxisAngle(UP,ang).addScaledVector(UP,lift).normalize();
     const tgt=g.P.clone().addScaledVector(g.n,-0.35); return {pos:tgt.clone().addScaledVector(dir,dist),tgt,fov:52,card:true}; }
   let vw=1,vh=1;
-  function slideFov(g){ const f=Math.max(0.3,(vh-250)/vh), va=vw/vh; const Hh=Math.max(0.5/f,(g.a/2)/(0.8*va)); return 2*Math.atan(Hh/D)*180/Math.PI; }
+  function slideFov(g){ const f=Math.max(0.3,(vh-Math.min(250,vh*0.3))/vh), va=vw/vh; const Hh=Math.max(0.5/f,(g.a/2)/((vw<700?0.97:0.8)*va)); return 2*Math.atan(Hh/D)*180/Math.PI; }
   function poseFor(b){
     const B=beats[b], c=chapters[B.ci];
     if(B.type==='slide'){ const g=G[B.g]; return {pos:g.C.clone(),tgt:g.P.clone(),fov:slideFov(g),g}; }
@@ -950,7 +971,7 @@ const CHAPTERS=[
     // caption + filmstrip
     const cap=$('cap');
     if(B.type==='slide'){ const g=G[B.g], c=chapters[g.ci]; $('capch').textContent=c.label; $('captx').textContent=g.cap; $('capn').textContent=`${g.j+1}/${c.P}`;
-      cap.style.opacity=1-smooth(0.08,0.3,Math.abs(u-beat)); stage.classList.toggle('zoomable',Math.abs(u-beat)<0.05); }
+      cap.style.opacity=1-smooth(0.08,0.3,Math.abs(u-beat)); stage.classList.toggle('zoomable',Math.abs(u-beat)<0.05); cap.classList.toggle('canzoom',Math.abs(u-beat)<0.05); }
     else if(B.type==='story'){ $('capch').textContent=chapters[B.ci].label; $('captx').textContent='Why it matters: '+STORIES[B.st.id].title.toLowerCase(); $('capn').textContent='';
       cap.style.opacity=1-smooth(0.08,0.3,Math.abs(u-beat)); stage.classList.remove('zoomable'); }
     else { cap.style.opacity=0; stage.classList.remove('zoomable'); }
@@ -986,10 +1007,10 @@ const CHAPTERS=[
     if(Math.abs(target+d-u)>4) return; go(target+d); }
 
   /* ---------- input ---------- */
-  const lb=$('lb'); const closeLB=()=>lb.classList.remove('open');
+  const lb=$('lb'); const closeLB=()=>{ if(window.__closeViewer) window.__closeViewer(); };
   // every wheel notch (or equivalent trackpad travel) queues one move
   let wAcc=0,wLast=0;
-  addEventListener('wheel',e=>{ e.preventDefault(); if(lb.classList.contains('open')){closeLB();return;}
+  addEventListener('wheel',e=>{ e.preventDefault(); if(lb.classList.contains('open')) return;
     if(mapBusy) return;
     const now=performance.now(), vert=Math.abs(e.deltaY)>=Math.abs(e.deltaX); let dlt=vert?e.deltaY:e.deltaX;
     if(e.deltaMode===1) dlt*=33; else if(e.deltaMode===2) dlt*=vh;
@@ -997,23 +1018,30 @@ const CHAPTERS=[
     wAcc+=dlt; const thr=Math.abs(dlt)>=50?90:240;
     while(Math.abs(wAcc)>=thr){ const d=Math.sign(wAcc); wAcc-=d*thr; step(d); } },{passive:false});
   let ty0=null;
-  addEventListener('touchstart',e=>{ty0=e.touches[0].clientY},{passive:true});
+  const noSwipe=e=>lb.classList.contains('open')||(e.target.closest&&e.target.closest('#cmenu,#emenu,.jumpmenu,.stripbox'));
+  let tx0=null;
+  addEventListener('touchstart',e=>{ const no=noSwipe(e)||e.touches.length>1; ty0=no?null:e.touches[0].clientY; tx0=no?null:e.touches[0].clientX; },{passive:true});
   addEventListener('touchmove',e=>{ if(!e.target.closest('.strip')) e.preventDefault(); },{passive:false});
-  addEventListener('touchend',e=>{ if(ty0==null) return; const dy=ty0-e.changedTouches[0].clientY; ty0=null; if(Math.abs(dy)>40&&!mapBusy) step(Math.sign(dy)); });
+  addEventListener('touchend',e=>{ if(ty0==null) return; const t=e.changedTouches[0], dy=ty0-t.clientY, dx=tx0-t.clientX; ty0=tx0=null; if(mapBusy) return;
+    if(Math.abs(dx)>Math.abs(dy)*1.2){ if(Math.abs(dx)>40) step(Math.sign(dx)); }   // swipe left = next, right = back
+    else if(Math.abs(dy)>40) step(Math.sign(dy)); });
   addEventListener('keydown',e=>{ const k=e.key;
     if(jumpMenu&&jumpMenu.classList.contains('open')){ const items=[...jumpMenu.children], i=items.indexOf(document.activeElement);
       if(k==='Escape'){ e.preventDefault(); closeJump(); jumpBtn.focus(); return; }
       if(k==='ArrowDown'||k==='ArrowUp'){ e.preventDefault(); items[(i+(k==='ArrowDown'?1:-1)+items.length)%items.length].focus(); return; }
       if(k==='Enter'||k===' ') return; }
-    if(lb.classList.contains('open')){ if(k==='Escape'||k===' '){e.preventDefault();closeLB();} return; }
+    if(lb.classList.contains('open')) return;
     if(e.target.closest&&e.target.closest('.leaf')&&(k==='Enter'||k===' ')) return;
     if(['ArrowDown','ArrowRight','PageDown',' '].includes(k)){e.preventDefault();step(1);}
     else if(['ArrowUp','ArrowLeft','PageUp'].includes(k)){e.preventDefault();step(-1);}
     else if(k==='Home'){e.preventDefault();go(0);} else if(k==='End'){e.preventDefault();go(LAST);}
     else if(k==='m'||k==='M'||k==='Escape'){ inMap()?leaveMap(target):openMap(); } });
-  lb.addEventListener('click',closeLB);
-  renderer.domElement.addEventListener('click',()=>{ const B=beats[Math.round(u)]; if(B.type!=='slide'||Math.abs(u-Math.round(u))>0.05) return;
-    const g=G[B.g]; $('lbimg').src=`img/${g.id}.jpg`; $('lbimg').alt=g.cap; $('lbcap').textContent=g.cap; lb.classList.add('open'); });
+  const openCurrent=()=>{ const B=beats[Math.round(u)]; if(B.type!=='slide'||Math.abs(u-Math.round(u))>0.05) return;
+    let k=B.g; const pack=g=>({src:`img/${g.id}.jpg`,cap:g.cap,a:g.a,pos:`${chapters[g.ci].label} · ${g.j+1}/${chapters[g.ci].P}`});
+    const nav=d=>{ const nk=k+d; if(nk<0||nk>=G.length) return null; k=nk; const g=G[k]; anim=null; vel=0; target=g.beat; u=g.beat; dirty=true; return pack(g); };
+    const p=pack(G[k]); window.__openViewer&&window.__openViewer(p.src,p.cap,p.a,nav,p.pos); };
+  renderer.domElement.addEventListener('click',openCurrent);
+  $('zoombtn').addEventListener('click',e=>{ e.stopPropagation(); openCurrent(); });
 
   /* ======================= TREE MAP ======================= */
   const svg=$('treesvg'), NS='http://www.w3.org/2000/svg', tree=$('tree');
@@ -1144,6 +1172,85 @@ const CHAPTERS=[
       (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(done,()=>{ const r=document.createRange(); r.selectNodeContents(c.previousElementSibling.querySelector('a')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); c.textContent='Press Ctrl+C'; }); }
     if(e.target.closest('[data-gocontact]')){ close(); if(window.__goContact) window.__goContact(); else { const st=document.getElementById('static'); st&&st.lastElementChild&&st.lastElementChild.scrollIntoView({behavior:'smooth'}); } }
   });
+})();
+</script>
+
+<script>
+/* slide viewer: pinch / wheel / double-tap zoom, drag to pan */
+(()=>{
+  const lb=document.getElementById('lb'), stg=document.getElementById('lbstage'), img=document.getElementById('lbimg'),
+        cap=document.getElementById('lbcap'), hint=document.getElementById('lbhint');
+  let s=1, tx=0, ty=0, fw=0, fh=0, ar=16/9, back=null, nav=null, capText='', posText='';
+  const MAX=5, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const touchy=matchMedia('(pointer:coarse)').matches;
+  function fit(){ const W=stg.clientWidth-16, H=stg.clientHeight-16; fw=Math.min(W,H*ar); fh=fw/ar;
+    img.style.width=fw+'px'; img.style.height=fh+'px'; img.style.marginLeft=(-fw/2)+'px'; img.style.marginTop=(-fh/2)+'px'; }
+  function bound(){ const W=stg.clientWidth, H=stg.clientHeight, mx=Math.max(0,(fw*s-W)/2+8), my=Math.max(0,(fh*s-H)/2+8);
+    tx=clamp(tx,-mx,mx); ty=clamp(ty,-my,my); }
+  function apply(anim){ bound(); img.style.transition=anim?'transform .25s ease':'none'; img.style.transform=`translate(${tx}px,${ty}px) scale(${s})`;
+    stg.classList.toggle('zoomed',s>1.01); }
+  function zoomAt(ns,qx,qy,anim){ ns=clamp(ns,1,MAX); const r=stg.getBoundingClientRect(), cx=qx-r.left-r.width/2, cy=qy-r.top-r.height/2;
+    tx=cx-(cx-tx)*ns/s; ty=cy-(cy-ty)*ns/s; s=ns; apply(anim); hint.style.opacity=0; }
+  const center=()=>{ const r=stg.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2]; };
+  function setCap(caption,pos){ cap.innerHTML=''; cap.append(document.createTextNode(caption||'')); const sm=document.createElement('small');
+    sm.textContent=(pos?pos+' · ':'')+(touchy?'pinch or double-tap to zoom · swipe for next':'scroll or double-click to zoom · ← → for next'); cap.append(sm);
+    document.getElementById('lbprev').style.display=document.getElementById('lbnext').style.display=nav?'':'none'; }
+  function load(r,dir){ s=1; tx=0; ty=0; img.alt=r.cap||''; setCap(r.cap,r.pos); img.classList.remove('fadein'); void img.offsetWidth; img.classList.add('fadein');
+    const go=()=>{ ar=(img.naturalWidth&&img.naturalHeight)?img.naturalWidth/img.naturalHeight:(r.a||16/9); fit(); apply(false); };
+    ar=r.a||ar; img.onload=go; img.src=r.src; fit(); apply(false); if(img.complete) go(); }
+  function stepSlide(d){ if(!nav) return; const r=nav(d); if(r) load(r,d); else { img.style.transition='transform .15s'; img.style.transform=`translate(${-d*24}px,0)`; setTimeout(()=>apply(true),150); } }
+  function open(src,caption,aspect,navFn,pos){ back=document.activeElement; nav=navFn||null;
+    s=1; tx=0; ty=0; img.alt=caption||''; setCap(caption,pos);
+    const portrait=innerHeight>innerWidth&&innerWidth<700;
+    hint.textContent=portrait?'Tip: turn your phone sideways for a bigger view':(touchy?'Pinch to zoom':'Scroll to zoom');
+    hint.style.opacity=1;
+    lb.classList.add('open');
+    const go=()=>{ ar=(img.naturalWidth&&img.naturalHeight)?img.naturalWidth/img.naturalHeight:(aspect||16/9); fit(); apply(false); };
+    ar=aspect||ar; img.onload=go; img.src=src; fit(); apply(false); if(img.complete) go();
+    document.getElementById('lbclose').focus({preventScroll:true}); }
+  function close(){ if(!lb.classList.contains('open')) return; lb.classList.remove('open'); if(back&&back.focus) back.focus({preventScroll:true}); }
+  window.__openViewer=open; window.__closeViewer=close;
+  document.getElementById('lbclose').onclick=close;
+  document.getElementById('lbprev').onclick=()=>stepSlide(-1);
+  document.getElementById('lbnext').onclick=()=>stepSlide(1);
+  document.getElementById('lbin').onclick=()=>{ const [x,y]=center(); zoomAt(s*1.6,x,y,true); };
+  document.getElementById('lbout').onclick=()=>{ const [x,y]=center(); zoomAt(s/1.6,x,y,true); };
+  document.getElementById('lbfit').onclick=()=>{ s=1; tx=0; ty=0; apply(true); };
+  addEventListener('resize',()=>{ if(lb.classList.contains('open')){ fit(); apply(false); } });
+  lb.addEventListener('wheel',e=>{ e.preventDefault(); e.stopPropagation(); if(!e.target.closest('#lbstage')) return;
+    let d=e.deltaY; if(e.deltaMode===1) d*=33; zoomAt(s*Math.exp(-d*0.0022),e.clientX,e.clientY,false); },{passive:false});
+  addEventListener('keydown',e=>{ if(!lb.classList.contains('open')) return; const k=e.key; e.stopPropagation();
+    if(k==='Escape'){ e.preventDefault(); close(); }
+    else if(k==='+'||k==='='){ e.preventDefault(); const [x,y]=center(); zoomAt(s*1.6,x,y,true); }
+    else if(k==='-'||k==='_'){ e.preventDefault(); const [x,y]=center(); zoomAt(s/1.6,x,y,true); }
+    else if(k==='0'){ e.preventDefault(); s=1; tx=0; ty=0; apply(true); }
+    else if((k==='ArrowRight'||k==='ArrowLeft')&&s<=1.01){ e.preventDefault(); stepSlide(k==='ArrowRight'?1:-1); }
+    else if(k.startsWith('Arrow')&&s>1){ e.preventDefault(); const m=60; if(k==='ArrowLeft') tx+=m; if(k==='ArrowRight') tx-=m; if(k==='ArrowUp') ty+=m; if(k==='ArrowDown') ty-=m; apply(true); }
+    else if(k==='Tab'){ const f=[...lb.querySelectorAll('button')], i=f.indexOf(document.activeElement); e.preventDefault(); f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus(); }
+  },true);
+  // pointers: one finger pans, two fingers pinch, a quick tap on the dark area closes, double-tap toggles zoom
+  const P=new Map(); let pinch=null, moved=0, downAt=0, lastTap=0, lastTapXY=[0,0], sx0=0, sy0=0, multi=false;
+  stg.addEventListener('pointerdown',e=>{ stg.setPointerCapture(e.pointerId); P.set(e.pointerId,[e.clientX,e.clientY]);
+    if(P.size===1){ moved=0; downAt=performance.now(); sx0=e.clientX; sy0=e.clientY; multi=false; }
+    if(P.size===2){ multi=true; const [a,b]=[...P.values()]; pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),s,mx:(a[0]+b[0])/2,my:(a[1]+b[1])/2}; moved=99; }
+    if(s>1) stg.classList.add('dragging'); });
+  stg.addEventListener('pointermove',e=>{ if(!P.has(e.pointerId)) return; const prev=P.get(e.pointerId); P.set(e.pointerId,[e.clientX,e.clientY]);
+    if(P.size===2&&pinch){ const [a,b]=[...P.values()], d=Math.hypot(a[0]-b[0],a[1]-b[1]), mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2;
+      tx+=mx-pinch.mx; ty+=my-pinch.my; pinch.mx=mx; pinch.my=my; zoomAt(pinch.s*d/pinch.d,mx,my,false); return; }
+    const dx=e.clientX-prev[0], dy=e.clientY-prev[1]; moved+=Math.abs(dx)+Math.abs(dy);
+    if(s>1){ tx+=dx; ty+=dy; apply(false); } });
+  const up=e=>{ if(!P.has(e.pointerId)) return; P.delete(e.pointerId); if(P.size<2) pinch=null;
+    if(P.size===0){ stg.classList.remove('dragging');
+      const dx=e.clientX-sx0, dy=e.clientY-sy0;
+      if(!multi&&s<=1.01&&Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.3){ stepSlide(dx<0?1:-1); return; }
+      const quick=performance.now()-downAt<300 && moved<10;
+      if(quick){ const now=performance.now();
+        if(now-lastTap<320 && Math.hypot(e.clientX-lastTapXY[0],e.clientY-lastTapXY[1])<40){ lastTap=0; clearTimeout(up.t);
+          if(s>1.01){ s=1; tx=0; ty=0; apply(true); } else zoomAt(2.5,e.clientX,e.clientY,true); }
+        else { lastTap=now; lastTapXY=[e.clientX,e.clientY]; const onImg=e.target===img;
+          clearTimeout(up.t); up.t=setTimeout(()=>{ if(!onImg&&s<=1.01) close(); },330); } } } };
+  stg.addEventListener('pointerup',up); stg.addEventListener('pointercancel',up);
+  stg.addEventListener('dblclick',e=>e.preventDefault());
 })();
 </script>
 
