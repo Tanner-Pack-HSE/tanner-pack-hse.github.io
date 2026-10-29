@@ -303,14 +303,14 @@ body.flat .static{display:flex;flex-direction:column;gap:48px;align-items:center
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-const A={"p03_0":1.7874,"p03_1":1.7874,"p04_0":1.7814,"p04_1":1.7814,"p05_0":1.7778,"p06_0":1.7778,"p06_1":1.7778,"p07_0":1.7891,"p07_1":1.7891,"p08_0":1.7844,"p08_1":1.7844,"p09_0":1.7723,"p09_1":1.7783,"p10_0":1.8093,"p10_1":1.8093,"p11_0":1.7932,"p11_1":1.7905,"p12_0":1.7874,"p12_1":1.7874,"p13_0":1.7874,"p13_1":1.7874,"p14_0":1.7874,"p14_1":1.7874,"p15_0":1.7814,"p15_1":1.7814,"p16_0":1.7814,"p16_1":1.7814,"p17_0":1.7814,"p17_1":1.7814,"p18_0":1.7814,"p18_1":1.7814,"p19_0":1.7814,"p19_1":1.7814,"p20_0":1.7814,"p20_1":1.7814,"p21_0":1.7814,"p22_0":1.7814,"p22_1":1.7814,"p24_0":0.861,"p25_0":0.9647,"p26_0":0.9096,"p27_0":0.9039,"p28_0":0.8986,"p29_0":0.8233,"p30_0":0.9106,"p31_0":1.0074,"p33_0":0.9286,"p34_0":1.8249,"p35_0":0.9656,"s01":1.7778,"s02":1.7778,"s03":1.7778,"s04":1.7778,"s05":1.7778,"s06":1.6,"s07":1.7778,"r01":1.6,"r01a":1.7778,"r01b":1.7778,"r02":1.4545};
+const A={"p03_0":1.7874,"p03_1":1.7874,"p04_0":1.7814,"p04_1":1.7814,"p05_0":1.7778,"p06_0":1.7778,"p06_1":1.7778,"p07_0":1.7891,"p07_1":1.7891,"p08_0":1.7844,"p08_1":1.7844,"p09_0":1.7723,"p09_1":1.7783,"p10_0":1.8093,"p10_1":1.8093,"p11_0":1.7932,"p11_1":1.7905,"p12_0":1.7874,"p12_1":1.7874,"p13_0":1.7874,"p13_1":1.7874,"p14_0":1.7874,"p14_1":1.7874,"p15_0":1.7814,"p15_1":1.7814,"p16_0":1.7814,"p16_1":1.7814,"p17_0":1.7814,"p17_1":1.7814,"p18_0":1.7814,"p18_1":1.7814,"p19_0":1.7814,"p19_1":1.7814,"p20_0":1.7814,"p20_1":1.7814,"p21_0":1.7814,"p22_0":1.7814,"p22_1":1.7814,"p24_0":0.861,"p25_0":0.9647,"p26_0":0.9096,"p27_0":0.9039,"p28_0":0.8986,"p29_0":0.8233,"p30_0":0.9106,"p31_0":1.0074,"p33_0":0.9286,"p34_0":1.8249,"p35_0":0.9656,"s01":1.7778,"s02":1.7778,"s03":1.7778,"s04":1.7778,"s05":1.7778,"s06":1.6,"s07":1.7778,"r01":1.6,"r01a":1.7778,"r01b":1.7778,"r02":1.4545,"u01":1.7778,"u02":1.7778,"u03":1.7778,"u04":1.7778,"u05":1.7778,"u06":1.7778,"u07":1.7778,"u08":1.7778,"u09":1.7778,"d01":1.7778,"d02":1.7778,"d03":1.7778,"d04":1.7778,"d05":1.7778,"d06":1.7778,"d07":1.7778,"d08":1.7778,"e01":1.7778,"e02":1.7778,"e03":1.7778,"e04":1.7778,"e05":1.7778};
 const S=(id,cap)=>({id,cap,dark:+id.slice(1,3)<=22});
 
 const CHAPTERS=[
  {key:'about',label:'About',card:`
    <p class="eyebrow">Selected work · 2026</p>
    <h1>I design interfaces for people working under pressure.</h1>
-   <p>I'm a human systems engineer. I study the people who run a system, find where it breaks down for them, and design the screens, alerts and workflows that fix it. This portfolio covers a three-operator drone control station, stakeholder research with Honeywell, and a study of when tired operators need help from automation.</p>
+   <p>I'm a human systems engineer. I study the people who run a system, find where it breaks down for them, and design the screens, alerts and workflows that fix it. This portfolio covers a three-operator drone control station, stakeholder research with Honeywell, a study of when tired operators need help from automation, field research on airline seating, a gamified study app, a website usability study and a medical device critique.</p>
    <dl class="facts">
      <div><dt>Education</dt><dd>M.S. Human Systems Engineering, ASU, 2026</dd></div>
      <div><dt>Undergrad</dt><dd>B.S. HSE, ASU, summa cum laude</dd></div>
@@ -377,6 +377,31 @@ const CHAPTERS=[
    </dl>
    <ul class="skills"><li>Intercept interviews</li><li>Survey design</li><li>Data-collection tool</li><li>Willingness to pay</li></ul>`,
   slides:[S('s01','Who I talked to: 25 travelers at the airport'),S('s02','Demand: 16 of 25 would use it'),S('s03','Most people want a quiet neighbor'),S('s04','Interest doesn’t equal payment'),S('s05','Frequent flyers were least willing to pay'),S('s07','15 of 25 would switch airlines for it'),S('s06','What it means for the design')]},
+ {key:'schoolup',label:'School Up app',card:`
+   <p class="eyebrow">Project 05 · Product Design &amp; Evaluation · Fall 2024 <span class="status done">Completed</span></p>
+   <h2>School Up: a study app that levels you up</h2>
+   <p class="small">A solo product design project. After interviewing a student who wanted a real reward for finishing assignments, I designed an app that turns homework into XP, with a bonus for finishing early and a character that grows as you level up. I wrote user stories, mapped the flow, wireframed every screen, built a clickable Figma prototype and ran a think-aloud usability test with three users aged 20 to 65.</p>
+   <ul class="skills"><li>User interview</li><li>User stories</li><li>User flow</li><li>Wireframing</li><li>Figma prototype</li><li>Usability testing</li></ul>`,
+  slides:[S('u01','School Up: a study app that levels you up'),S('u02','Research: what the student was missing'),S('u03','Concept: XP, early-finish bonus, a growing character'),S('u04','Seven user stories, seven features'),S('u05','User flow and paper sketches'),S('u06','Wireframes for all seven screens'),S('u07','Clickable Figma prototype'),S('u08','Usability test: three users, think-aloud'),S('u09','Fixes and lessons')]},
+
+ {key:'dutch',label:'Dutch Bros site',card:`
+   <p class="eyebrow">Project 06 · Website usability study · Team of 3 <span class="status done">Completed</span></p>
+   <h2>Why couldn't anyone find a price on the Dutch Bros website?</h2>
+   <p class="small">With Logan Rupp and Marco Cossio, I tested the Dutch Bros website with 6 participants across 3 scenarios and 9 timed tasks, and ran a 247-item heuristic evaluation. Every participant failed to find menu pricing. We redesigned the home page, menu, drink page and cart around prices by nearest store.</p>
+   <dl class="facts">
+     <div><dt>Found a price</dt><dd>0 of 6</dd></div>
+     <div><dt>Raised it unprompted</dt><dd>5 of 6</dd></div>
+     <div><dt>Heuristic score</dt><dd>75% overall</dd></div>
+   </dl>
+   <ul class="skills"><li>Scenario-based testing</li><li>Heuristic evaluation</li><li>Surveys</li><li>Redesign</li></ul>`,
+  slides:[S('d01','Dutch Bros website: the question'),S('d02','Method: 6 participants, 3 scenarios, 9 tasks'),S('d03','Heuristic evaluation: 75% overall'),S('d04','Nobody could find a price'),S('d05','Two smaller needs: ordering and location'),S('d06','Redesign: home and full menu'),S('d07','Redesign: drink page and order'),S('d08','What I took from it')]},
+
+ {key:'suear',label:'Suear ear camera',card:`
+   <p class="eyebrow">Project 07 · Medical device critique</p>
+   <h2>Would a first-time user stay safe with a camera in their ear?</h2>
+   <p class="small">A critique of the Suear camera ear wax removal tool, its phone app and its printed instructions. The battery lock was well designed, but the camera image rotates and mirrors during use, Wi-Fi setup happens outside the app, and nothing shows how to actually clean an ear safely.</p>
+   <ul class="skills"><li>Instructions review</li><li>Safety analysis</li><li>Mobile app critique</li><li>Recommendations</li></ul>`,
+  slides:[S('e01','Suear ear wax camera: the question'),S('e02','What works: video setup and a battery lock'),S('e03','What could hurt someone: a rotating picture'),S('e04','Where the instructions fall short'),S('e05','Recommendations')]},
  {key:'contact',label:'Contact',card:`
    <p class="eyebrow">Next</p>
    <h2>Let's talk about your users.</h2>
@@ -571,6 +596,30 @@ const CHAPTERS=[
       {d:3.6,cap:'Past 23 breaths a minute, the system steps in to help.',f(P,p,T){ const v=L(22,25,E(p,0,.5)), b=1+Math.sin(T*7)*.12; torso(P,b); P.c(INK.r,3).dash(600,300,1220,300); wave(P,T,2.6,L(400,330,E(p,0,.5))); P.c(v>=23?INK.r:INK.w,4).t(`${Math.round(v)} / min`,1120,560,48);
         if(v>=23){ P.c(INK.r,4).ga(.55+.45*Math.sin(T*6)).t('over the limit',910,212,40).ga(1); } if(v>=23){ P.c(INK.t,4).ga(E(p,.5,.75)).robot(900,170,.7).t('assist on',1030,170,40).ga(1); } }},
     ]},
+    u03:{title:'Why make homework a game?',scenes:[
+      {d:3.4,cap:'Turn in an assignment and it just disappears from a list.',f(P,p,T){ todo(P,E(p,.3,.6)); }},
+      {d:3.8,cap:'In School Up, every assignment fills your XP bar.',f(P,p,T){ xpBar(P,E(p,.1,.85),T); P.c(INK.w,3); for(let q=0;q<3;q++){ const t=E(p,q*.25,q*.25+.3); if(t>0&&t<1) P.ga(1-t).c(INK.a,4).rc(L(220,560,t)-40,L(250,330,t),80,56,1).l(L(220,560,t)-24,L(250,330,t)+20,L(220,560,t)+24,L(250,330,t)+20,1).ga(1); } }},
+      {d:4.2,cap:'Fill it up and you level up. Your character grows with you.',f(P,p,T){ xpBar(P,1-E(p,.15,.3),T,580); const b=E(p,.05,.25); P.c(INK.a,6).ga(b).push(640,120,0,.7+.3*b+Math.sin(T*6)*.03).t('LEVEL UP!',0,0,96).pop().ga(1);
+        knight(P,640,470,1,1-E(p,.35,.55)); knight(P,640,480,1.45,E(p,.45,.7),true); }},
+    ]},
+    u08:{title:'Why test with real people?',scenes:[
+      {d:3.4,cap:'The screen said “Select a character.”',f(P,p,T){ P.c(INK.w,4).phone(520,150,240,440); P.c(INK.w,3).t('Select a',640,260,38).t('character',640,300,38); P.rc(560,350,160,170,1); P.c(INK.p,4).person(940,330,1.1); }},
+      {d:3.4,cap:'The first thing users said was “how?”',f(P,p,T){ P.c(INK.w,4).phone(520,150,240,440); P.c(INK.w,3).t('Select a',640,260,38).t('character',640,300,38).rc(560,350,160,170,1); P.c(INK.p,4).person(940,330,1.1);
+        P.c(INK.a,4).ga(E(p,.1,.4)).o(1010,220,90,50).t('how?',1010,220,54).ga(1); }},
+      {d:3.8,cap:'Adding “Tap a character to pick it” fixed it.',f(P,p,T){ P.c(INK.w,4).phone(520,150,240,440); P.c(INK.w,3).t('Tap a character',640,250,30).t('to pick it',640,285,30).rc(560,350,160,170,1); P.c(INK.p,4).person(940,330,1.1);
+        const t=E(p,.2,.6); P.c(INK.a,4).dot(L(900,640,t),L(420,430,t),12); if(p>.65){ P.c(INK.g,6).check(640,435,1.2); } }},
+    ]},
+    d04:{title:'Why prices matter',scenes:[
+      {d:3.6,cap:'Every participant looked for a price. None found one.',f(P,p,T){ board(P,E(p,0,.6)); P.c(INK.p,4).person(980,360,1,-.2); P.c(INK.a,5).ga(E(p,.5,.8)).t('$?',1080,290,60).ga(1); }},
+      {d:3.6,cap:'“Do I just need to call them?”',f(P,p,T){ board(P,1); P.c(INK.p,4).person(980,360,1,-.2); P.c(INK.w,4).push(1050,330,Math.sin(T*30)*.08*(p>.3?1:0)).phone(-24,-44,48,88).pop();
+        P.c(INK.r,4).ga(E(p,.4,.7)).t('customer service',1040,240,40).ga(1); }},
+      {d:3.8,cap:'Showing prices from the nearest store fixes it.',f(P,p,T){ board(P,1,E(p,.1,.7)); P.c(INK.p,4).person(980,360,1,-.2); if(p>.75) P.c(INK.g,6).check(1080,280,1.3); }},
+    ]},
+    e03:{title:'Why rotation matters',scenes:[
+      {d:3.4,cap:'You steer the camera by watching your phone.',f(P,p,T){ earScene(P,0,T); }},
+      {d:3.8,cap:'Then the picture flips, and your hand goes the wrong way.',f(P,p,T){ const f=E(p,.15,.35); earScene(P,f,T,E(p,.4,.7)); if(p>.45) P.c(INK.r,5).ga(.5+.5*Math.sin(T*10)).t('!',1100,200,90).ga(1); }},
+      {d:3.6,cap:'Lock rotation by default, and it can’t happen.',f(P,p,T){ earScene(P,0,T); P.c(INK.a,4).ga(E(p,.1,.4)).push(920,190).rc(-30,-6,60,46,1).arc(0,-6,20,Math.PI,Math.PI*2).pop().ga(1); if(p>.6) P.c(INK.g,6).check(1040,200,1.2); }},
+    ]},
     s02:{title:'What travelers actually want',scenes:[
       {d:3.4,cap:'A chatty neighbor can turn a flight into work.',f(P,p,T){ rowSeats(P); P.c(INK.p,4).person(480,330,.9); P.c(INK.t,4).person(800,330,.9);
         const n=Math.floor(E(p,0,.8)*4); for(let q=0;q<n;q++){ const x=560+q*40, y=230-q*36; P.c(INK.p,3).o(x,y,46,26,1).l(x-26,y-4,x+22,y-4,1).l(x-26,y+8,x+10,y+8,1); }
@@ -615,6 +664,15 @@ const CHAPTERS=[
       if(pp>=.98) arrived++;
       P.c(pp>=.98?INK.t:INK.w,3).head(L(sx,tx,pp),L(sy,ty,pp)-Math.sin(pp*Math.PI)*40,.42); }
     if(!done){ P.c(INK.a,5).t('$'+(arrived*240).toLocaleString(),950,600,64); P.c(INK.w,3).t(arrived+' new bookings',950,650,32); } }
+  function todo(P,gone){ P.c(INK.w,4).rc(380,150,520,450); P.c(INK.w,3).t('To do',640,200,46); ['Essay draft','Reading ch. 4','Lab report'].forEach((t,i)=>{ const y=280+i*100, x=470;
+      P.c(INK.w,3).ga(i===0?1-gone:1).rc(x-30,y-22,44,44,1).t(t,x+40,y,40,'left'); if(i===0) P.c(INK.m,3).l(x+30,y,x+30+260*Math.min(1,gone*1.6),y,1); P.ga(1); }); }
+  function xpBar(P,f,T,y=470){ P.c(INK.w,3).t('XP',250,y,48); P.c(INK.w,4).rc(300,y-30,700,60); const lw=P.ctx.lineWidth; P.c(INK.t,40).l(318,y,318+Math.max(2,664*clamp(f,0,1)),y,1); P.ctx.lineWidth=lw; P.c(INK.w,3).t(Math.round(clamp(f,0,1)*100)+'%',1060,y,40); }
+  function knight(P,x,y,s,a,big){ if(a<=0.02) return; P.ga(a).c(big?INK.a:INK.w,4).person(x,y-150*s,s); P.rc(x-12*s,y-185*s,24*s,14*s,1); P.l(x+34*s,y-80*s,x+64*s,y-170*s);
+    if(big){ P.o(x-40*s,y-90*s,22*s,30*s,1); for(let q=0;q<5;q++){ const an=-Math.PI/2+(q-2)*.35; P.l(x+Math.cos(an)*40*s,y-150*s+Math.sin(an)*40*s,x+Math.cos(an)*58*s,y-150*s+Math.sin(an)*58*s,1); } } P.ga(1); }
+  function board(P,draw,priced=0){ P.c(INK.w,4).rc(170,140,560,420); P.c(INK.w,3).t('MENU',450,190,52); ['Classic','Cold brew','Rebel','Freeze'].forEach((t,i)=>{ const y=270+i*72; P.ga(clamp(draw*4-i,0,1)).c(INK.w,3).t(t,230,y,40,'left');
+      if(priced>i/4+.05) P.c(INK.g,4).t(['$3.99','$5.99','$3.99','$5.99'][i],670,y,40,'right'); else P.c(INK.r,4).t('?',650,y,48); P.ga(1); }); }
+  function earScene(P,flip,T,jerk=0){ P.c(INK.w,4).push(640,350,flip*Math.PI).rc(-130,-210,260,420).o(0,-10,100).c(INK.m,3).o(-14,-30,30,22,1).o(36,24,18,14,1).pop();
+    const hx=930+jerk*(-90)+Math.sin(T*2)*6, hy=470+jerk*50; P.c(INK.p,4).l(hx,hy,hx+70,hy+120).l(hx,hy,hx-80,hy-60).o(hx+90,hy+140,28,34,1); P.c(INK.a,3).ar(hx-30,hy-110,hx-110+(jerk?-60:0),hy-160+(jerk?60:0)); }
   function rowSeats(P){ P.c(INK.w,3); [400,560,720,880].forEach(x=>{ P.rc(x-60,420,120,90,1).rc(x-60,330,22,100,1); }); P.l(300,520,980,520); }
   function s1ground(P,crack){ P.c(INK.w,3).pl([[40,520],[260,470],[500,505],[720,440],[960,470],[1240,450]]); P.c(INK.w,4).l(60,610,520,575).l(640,566,1220,530);
     const cr=[[520,575],[548,548],[566,590],[592,556],[640,566]]; if(crack>0) P.c(INK.r,4).pl(cr.slice(0,1+Math.round(crack*4))); }
@@ -1073,8 +1131,11 @@ const CHAPTERS=[
     uas3:{from:[497,480],via:[430,330],tip:[420,115],col:'#ffb547',lx:420,ly:225},
     uas4:{from:[500,505],via:[300,470],tip:[95,265],col:'#ffb547',lx:95,ly:335},
     hw:  {from:[503,480],via:[600,330],tip:[700,200],col:'#67d1c1',lx:700,ly:290},
-    fat: {from:[505,515],via:[700,470],tip:[860,405],col:'#9aa8ff',lx:860,ly:465},
-    seat:{from:[502,470],via:[540,330],tip:[575,175],col:'#e9edf5',lx:575,ly:112}};
+    fat: {from:[505,515],via:[700,480],tip:[860,435],col:'#9aa8ff',lx:860,ly:492},
+    seat:{from:[502,470],via:[540,330],tip:[575,175],col:'#e9edf5',lx:575,ly:112},
+    schoolup:{from:[506,470],via:[720,300],tip:[840,150],col:'#ff9fbf',lx:840,ly:78},
+    dutch:{from:[508,500],via:[760,400],tip:[880,285],col:'#ffd966',lx:880,ly:352},
+    suear:{from:[495,490],via:[320,320],tip:[175,125],col:'#8fe3a0',lx:175,ly:195}};
   const leafG=mk('g',{}), tip=$('tip');
   const moveTip=e=>{tip.style.left=Math.min(e.clientX+14,innerWidth-270)+'px';tip.style.top=(e.clientY+16)+'px';};
   const showTip=(e,t)=>{tip.textContent=t;tip.style.opacity=1;moveTip(e);};
@@ -1139,7 +1200,7 @@ const CHAPTERS=[
 
   addEventListener('resize',layout);
   // deep links: yoursite/#honeywell opens straight to that project (for separate LinkedIn project entries)
-  const LINKS={about:'about',uas:'uas1',drone:'uas1',interfaces:'uas2',warnings:'uas3',alerts:'uas3',automation:'uas4',honeywell:'hw',fatigue:'fat',seats:'seat',seat:'seat',contact:'contact'};
+  const LINKS={about:'about',uas:'uas1',drone:'uas1',interfaces:'uas2',warnings:'uas3',alerts:'uas3',automation:'uas4',honeywell:'hw',fatigue:'fat',seats:'seat',seat:'seat',schoolup:'schoolup',school:'schoolup',dutch:'dutch',dutchbros:'dutch',suear:'suear',earwax:'suear',medical:'suear',contact:'contact'};
   function fromHash(){ const h=(location.hash||'').slice(1).toLowerCase(), key=LINKS[h]; if(!key) return false;
     const c=chapters.find(x=>x.key===key); if(!c) return false; anim=null; vel=0; target=c.start; u=c.start; dirty=true;
     if(!hintGone){hintGone=true;$('hint').style.opacity=0;} return true; }
